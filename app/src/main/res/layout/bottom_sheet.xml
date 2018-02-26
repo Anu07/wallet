@@ -1,0 +1,50 @@
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimaryLight"
+    android:clipToPadding="true"
+    android:padding="@dimen/l_padding"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView android:id="@+id/msg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/are_you_sure"
+            android:textAllCaps="false"
+            android:textSize="20sp" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+             android:gravity="center"
+            android:layout_marginTop="@dimen/m_margin"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/yes_bttn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark"
+                android:text="Yes"
+                android:layout_marginRight="@dimen/xl_margin"
+                android:textColor="@color/colorPrimary" />
+            <Button
+                android:id="@+id/no_bttn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark"
+                android:text="No"
+                android:layout_marginLeft="@dimen/xl_margin"
+                android:layout_toRightOf="@+id/yes_bttn"
+                android:layout_centerInParent="true"
+                android:textColor="@color/colorPrimary" />
+        </RelativeLayout>
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>
