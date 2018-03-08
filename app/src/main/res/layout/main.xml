@@ -106,14 +106,43 @@
 
                 </LinearLayout>
 
-
-                <Button
-                    android:id="@+id/transfer_bttn"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <Button
+                        android:id="@+id/transfer_bttn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/rounded_border_bacground"
+                        android:text="@string/send"
+                        android:textColor="@color/colorPrimary" />
+
+                    <Button
+                        android:id="@+id/send_bttn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/rounded_border_bacground"
+                        android:text="@string/recv"
+                        android:textColor="@color/colorPrimary" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/crash_bttn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/rounded_border_bacground"
-                    android:text="@string/transfer"
+                    android:text="@string/recv"
                     android:textColor="@color/colorPrimary" />
 
                 <LinearLayout
@@ -156,6 +185,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:visibility="gone"
         app:headerLayout="@layout/nav_header_main2"
         app:menu="@menu/activity_main2_drawer" />
 

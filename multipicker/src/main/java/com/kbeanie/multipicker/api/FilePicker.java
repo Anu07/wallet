@@ -133,7 +133,7 @@ public final class FilePicker extends PickerManager {
     private void handleFileData(Intent intent, String userId, String transactionId) {
         List<CreditModel> msgs = new ArrayList<>();
         if (intent != null) {
-            if (intent.getDataString() != null) {
+            if (intent.getData()!=null) {
                 String msg = intent.getDataString();
                 LogUtils.d(TAG, "handleFileData: " + msg);
                 CreditModel creditRequest=new CreditModel(userId,msg,transactionId);

@@ -34,13 +34,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.design.widget.BaseTransientBottomBar;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +51,8 @@ import com.kbeanie.multipicker.api.callbacks.FilePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenFile;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.OnClickListener;
-import com.orhanobut.dialogplus.ViewHolder;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -74,10 +71,14 @@ import app.src.com.walletapp.R;
 import app.src.com.walletapp.model.onlinepayment.OnlinePaymentRequest;
 import app.src.com.walletapp.model.onlinepayment.Payment;
 import app.src.com.walletapp.utils.MyPreferences;
+import app.src.com.walletapp.utils.WalletBalanceListener;
 import app.src.com.walletapp.wifip2p.beans.WiFiTransferModal;
 import app.src.com.walletapp.wifip2p.utils.PermissionsAndroid;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.Utils;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 import static android.content.ContentValues.TAG;
 import static app.src.com.walletapp.utils.CommonUtils.ONLINE;
@@ -88,12 +89,17 @@ import static app.src.com.walletapp.utils.CommonUtils.getUniqueDeviceId;
  * A fragment that manages a particular peer and allows interaction with device
  * i.e. setting up network connection and transferring data.
  */
-public class DeviceDetailFragment extends Fragment implements ConnectionInfoListener, FilePickerCallback, View.OnClickListener, OnClickListener {
+public class DeviceDetailFragment extends Fragment implements ConnectionInfoListener, FilePickerCallback {
 
     private static int val;
     private static String senderName;
     private static String txnId;
     private static String senderId;
+    @BindView(R.id.btn_connect)
+    Button btnConnect;
+    @BindView(R.id.btn_disconnect)
+    Button btnDisconnect;
+    Unbinder unbinder;
     private View mContentView = null;
     private WifiP2pDevice device;
     private WifiP2pInfo info;
@@ -122,7 +128,20 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     private static String TxnId;
     private FilePicker filePicker;
     private String pickerPath;
+    private LinearLayout connectDiscnnct;
+    static WalletBalanceListener mListener;
+    static int bal = 0;
 
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mListener = (WalletBalanceListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + e.getMessage());
+        }
+    }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -138,10 +157,10 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         mContentView = inflater.inflate(R.layout.device_detail, null);
-//        sendBttn = mContentView.findViewById(R.id.btn_start_client);
+        sendBttn = mContentView.findViewById(R.id.btn_start_client);
         amtEntered = mContentView.findViewById(R.id.amt_text);
         creditsLay = mContentView.findViewById(R.id.credits_lay);
-        reciever_name = mContentView.findViewById(R.id.name_text);
+        connectDiscnnct = mContentView.findViewById(R.id.cnnctDiscnnctLayout);
         sendCreditsBttn = mContentView.findViewById(R.id.sendMoney);
         mdeductionMsg = mContentView.findViewById(R.id.device_address);
         pDial = new ProgressDialog(getActivity());
@@ -160,8 +179,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
                             "Connecting to :" + device.deviceAddress, true, true
                     );
-//                    creditsLay.setVisibility(View.VISIBLE);
-//                    sendBttn.setVisibility(View.GONE);
+
                     //send dynamic image
                     ((DeviceActionListener) getActivity()).connect(config, position);
                 } else {
@@ -176,11 +194,51 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     @Override
                     public void onClick(View v) {
                         ((DeviceActionListener) getActivity()).disconnect();
+                        if (((WiFiDirectActivity) getActivity()).failedERROR) {
+                            progressDialog.dismiss();
+                        }
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
                     }
                 });
 
+        sendCreditsBttn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!amtEntered.getText().toString().equalsIgnoreCase("")) {
+                    sendCredits();
+                } else {
+                    Utils.showSnackBar(getView(), "Field can't be empty.");
+                }
+            }
+        });
+
+
+        unbinder = ButterKnife.bind(this, mContentView);
         return mContentView;
     }
+
+
+    /**
+     * To send credits
+     */
+
+
+    private void sendCredits() {
+        if (!amtEntered.getText().toString().equalsIgnoreCase("") && Integer.parseInt(amtEntered.getText().toString()) < SharedPreferencesHandler.getIntValues(getActivity(), "balance") && Integer.parseInt(amtEntered.getText().toString()) > 0 && Integer.parseInt(amtEntered.getText().toString()) != 0) {
+            pDial.show();
+            TxnId = Utils.getTransactionId();
+
+            ((WiFiDirectActivity)getActivity()).mHelper.saveTxnDetails(TxnId,amtEntered.getText().toString(),device.deviceAddress,"My device");
+
+
+            sendTextMsg("Transaction Id:" + TxnId + "," + "" + "," + amtEntered.getText().toString());
+        } else {
+            Utils.showSnackBar(getView(), "Invalid amount");
+        }
+    }
+
 
     @Override
     public void onConnectionInfoAvailable(final WifiP2pInfo info) {
@@ -189,7 +247,12 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         }
         this.info = info;
         this.getView().setVisibility(View.VISIBLE);
-
+        Log.i(TAG, "onConnectionInfoAvailable: now");
+        if(device !=null && device.status==3){       //connected
+            creditsLay.setVisibility(View.VISIBLE);
+            sendBttn.setVisibility(View.GONE);
+            btnConnect.setVisibility(View.GONE);
+        }
         // The owner IP is now known.
         TextView view = mContentView.findViewById(R.id.group_owner);
         view.setText(getResources().getString(R.string.group_owner_text)
@@ -198,9 +261,9 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
         // InetAddress from WifiP2pInfo struct.
         view = mContentView.findViewById(R.id.device_info);
-        if (info.groupOwnerAddress.getHostAddress() != null)
+        if (info != null && info.groupOwnerAddress.getHostAddress() != null) {
             view.setText("Group Owner IP - " + info.groupOwnerAddress.getHostAddress());
-        else {
+        } else {
             CommonMethods.DisplayToast(getActivity(), "Host Address not found");
         }
         // After the group negotiation, we assign the group owner as the file
@@ -211,10 +274,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             if (GroupOwner != null && !GroupOwner.equals(""))
                 SharedPreferencesHandler.setStringValues(getActivity(),
                         getString(R.string.pref_GroupOwnerAddress), GroupOwner);
-            mContentView.findViewById(R.id.btn_connect).setVisibility(View.GONE);
-            mContentView.findViewById(R.id.btn_disconnect).setVisibility(View.GONE);
-            mContentView.findViewById(R.id.bttns_connection).setVisibility(View.GONE);
-            creditsLay.setVisibility(View.GONE);
             //first check for file storage permission
             if (!PermissionsAndroid.getInstance().checkWriteExternalStoragePermission(getActivity())) {
                 Utils.getInstance().showToast("Please enable storage Permission from application storage option");
@@ -254,7 +313,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                             firstObj.execute();
                     }
                 }
-
                 FileServerAsyncTask FileServerobj = new FileServerAsyncTask(getActivity(),
                         getActivity(), FileTransferService.PORT);
                 if (FileServerobj != null) {
@@ -288,6 +346,13 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         view.setText(device.deviceAddress);
         view = mContentView.findViewById(R.id.device_info);
         view.setText(device.toString());
+        connectDiscnnct.setVisibility(View.VISIBLE);
+       /* if (device.status ==3) {
+            connectDiscnnct.setVisibility(View.VISIBLE);
+        } else if(device.status==2){
+            btnConnect.setVisibility(View.GONE);
+            creditsLay.setVisibility(View.VISIBLE);
+        }*/
     }
 
     /**
@@ -303,8 +368,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         view.setText(R.string.empty);
         view = mContentView.findViewById(R.id.status_text);
         view.setText(R.string.empty);
-        creditsLay.setVisibility(View.GONE);
-        this.getView().setVisibility(View.GONE);
+        
         /*
          * Remove All the prefrences here
          */
@@ -393,28 +457,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         }
     }
 
-    @Override
-    public void onClick(DialogPlus dialog, View view) {
-        switch (view.getId()) {
-            case R.id.yes_bttn:
-                dialog.dismiss();
-
-            case R.id.no_bttn:
-                dialog.dismiss();
-                Log.i(TAG, "onClick: checkonf");
-        }
-    }
-
-
-    /**
-     * Hit api for syncing data on server
-     */
-
-    private void syncOnline() {
-
-
-    }
-
 
     private void checkExternalStoragePermission(String s) {
         boolean isExternalStorage = PermissionsAndroid.getInstance().checkWriteExternalStoragePermission(getActivity());
@@ -432,9 +474,20 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         filePicker.setFolderName(getActivity().getString(R.string.app_name));
         MsgUri = Utils.generateNoteOnSD(getActivity(), "sender_credits.txt", msg);
         Log.i(TAG, "sendTextMsg: " + MsgUri);
-        Intent intent = new Intent();           //Custom inetnt to send text file to receiver
+        Intent intent = new Intent();           //Custom intent to send text file to receiver
         intent.setData(MsgUri);
-        filePicker.submit(intent, MyPreferences.getInstance().getPreference(MyPreferences.Keys.USERID), Utils.getTransactionId());
+        filePicker.submit(intent, "", Utils.getTransactionId());
+        updateValuesafterCreditsSent();
+    }
+
+    private void updateValuesafterCreditsSent() {
+        leftBalance = SharedPreferencesHandler.getIntValues(getActivity(), "balance") - Integer.parseInt(amtEntered.getText().toString());
+        Log.i(TAG, "onEditorAction: " + leftBalance);
+        SharedPreferencesHandler.setIntValues(getActivity(), "balance", leftBalance);
+        pDial.dismiss();
+        mListener.walletBalanceUpdate(SharedPreferencesHandler.getIntValues(getActivity(), "balance"));
+        Log.i(TAG, "updateValuesafterCreditsSent: " + SharedPreferencesHandler.getIntValues(getActivity(), "balance"));
+        amtEntered.setText("");
     }
 
 
@@ -447,13 +500,14 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
 
     @Override
-    public void onClick(View view) {
+    public void onError(String message) {
 
     }
 
     @Override
-    public void onError(String message) {
-
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
 
@@ -603,6 +657,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             if (result != null) {
                 if (!result.equalsIgnoreCase("Demo")) {
                     openFile(mActivity, result, mFilecontext);
+                    //TODO Update balance in main Activity
                 } else if (!TextUtils.isEmpty(result)) {
                     /*
                      * To initiate socket again we are intiating async task
@@ -639,13 +694,11 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         valueUpdated = checkAmountFromFile(Utils.readFromSD());
         senderName = Utils.readFromSD().split(",")[1];
         txnId = Utils.readFromSD().split(",")[0].split(":")[1];
-        senderId = Utils.readFromSD().split(",")[3].replace("\n", "");
         Log.i(TAG, "openFile: " + TxnId + "fdjdshf" + senderName + "SID" + senderId);
-        Payment payment = new Payment(String.valueOf(valueUpdated), MyPreferences.getInstance().getPreference(MyPreferences.Keys.Currency), "Cash received", getMacAddress(activity), getUniqueDeviceId(), MyPreferences.getInstance().getPreference(MyPreferences.Keys.USERID), Calendar.getInstance().getTime().toString(), txnId, senderId);
+        Payment payment = new Payment(String.valueOf(valueUpdated), "$", "Cash received", getMacAddress(activity), getUniqueDeviceId(), "", Calendar.getInstance().getTime().toString(), txnId, senderId);
+        bal = SharedPreferencesHandler.getIntValues(activity, "balance") + valueUpdated;
+        Log.i(TAG, "balance after recieving: " + bal);
         showRecieveAlert(activity, valueUpdated, payment);
-//        Toast.makeText(context, "Hi you have received $" + valueUpdated, Toast.LENGTH_LONG).show();
-
-//        mListenre.updateBalance(valueUpdated);
     }
 
     private static void showRecieveAlert(final Activity activity, int money, final Payment payment) {
@@ -658,14 +711,17 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         dialogBuilder.setTitle("Money Received");
         dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
+                mListener.walletBalanceUpdate(bal);
                 dialog.dismiss();
-                activity.startActivity(new Intent(activity, WiFiDirectActivity.class).putExtra("balance", valueUpdated));
-                activity.finish();
             }
         });
         AlertDialog b = dialogBuilder.create();
-        b.show();
-        b.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        try {
+            b.show();
+            b.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static OnlinePaymentRequest syncReceiveRequest(Payment payment) {
@@ -866,4 +922,5 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         }
 
     }
+
 }

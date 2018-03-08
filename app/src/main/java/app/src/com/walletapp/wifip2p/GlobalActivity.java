@@ -16,12 +16,17 @@ package app.src.com.walletapp.wifip2p;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
+
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
 
 
 /**
  * Created by Mobilyte on 2/18/2016.
  */
-public class GlobalActivity extends Application {
+public class GlobalActivity extends MultiDexApplication {
     private static Context context;
 
     public static synchronized Context getGlobalContext() {
@@ -34,7 +39,15 @@ public class GlobalActivity extends Application {
         super.onCreate();
         if (GlobalActivity.context == null) {
             GlobalActivity.context = getApplicationContext();
+
         }
+        Fabric.with(this, new Crashlytics());
+
+        /*final Fabric fabric = new Fabric.Builder(this)
+                .kits(new Crashlytics())
+                .debuggable(true)           // Enables Crashlytics debugger
+                .build();
+        Fabric.with(fabric);*/
     }
 
     @Override

@@ -7,10 +7,12 @@
     android:background="@drawable/details_view"
     android:orientation="vertical">
 
-    <LinearLayout android:id="@+id/bttns_connection"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/cnnctDiscnnctLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:visibility="gone"
         android:padding="@dimen/xs_padding">
 
         <Button
@@ -32,12 +34,12 @@
             android:text="@string/disconnect_peer_button"
             android:textColor="@color/colorPrimary" />
 
-        <!--<Button
+        <Button
             android:id="@+id/btn_start_client"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/get_file_button"
-            android:visibility="gone" />-->
+            android:visibility="gone" />
     </LinearLayout>
 
     <LinearLayout
@@ -49,28 +51,11 @@
         android:visibility="gone"
         android:weightSum="3">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Receiver Name">
-
-            <EditText
-                android:id="@+id/name_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:imeOptions="actionNext"
-                android:inputType="text"
-                android:maxLength="30"
-                android:paddingLeft="5dp" />
-        </android.support.design.widget.TextInputLayout>
-
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:hint="Amount">
 
             <EditText
@@ -102,8 +87,8 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimaryDark"
         android:padding="@dimen/xs_padding"
-        android:textColor="@color/colorPrimary"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:textColor="@color/colorPrimary" />
 
     <TextView
         android:id="@+id/device_info"

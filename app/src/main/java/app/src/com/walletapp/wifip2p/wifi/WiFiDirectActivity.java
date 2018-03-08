@@ -24,13 +24,13 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -41,7 +41,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -51,18 +50,24 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crash.FirebaseCrash;
+
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.presenter.LoginPresenter;
+import app.src.com.walletapp.sql.SQLiteHelper;
+import app.src.com.walletapp.utils.CommonUtils;
+import app.src.com.walletapp.utils.WalletBalanceListener;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
 import app.src.com.walletapp.wifip2p.utils.PermissionsAndroid;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 
 /**
@@ -72,7 +77,7 @@ import butterknife.ButterKnife;
  * The application should also register a BroadcastReceiver for notification of
  * WiFi state related events.
  */
-public class WiFiDirectActivity extends AppCompatActivity implements ChannelListener, DeviceActionListener,ShowMyInformation, NavigationView.OnNavigationItemSelectedListener {
+public class WiFiDirectActivity extends AppCompatActivity implements ChannelListener, DeviceActionListener,WalletBalanceListener,ShowMyInformation, NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -92,13 +97,18 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     private Button sendCredits;
     int wallet_curr;
     private WifiP2pManager p2pManager;
-    private Button transfer;
+    private Button trnsfr_bttn;
     private LinearLayout fragmentsLayout;
     private Dialog dialog;
     LoginPresenter mPresenter;
     @BindView(R.id.container)
     FrameLayout mContainer;
     private TextView walletMsg;
+    public boolean failedERROR = false;
+    private Button send_bttn;
+    private int mAmtUpdated=0;
+    public SQLiteHelper mHelper;
+    private Button crash_bttn;
 
 
     /**
@@ -108,15 +118,21 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         ButterKnife.bind(this);
         initViews();
-        setNavigationView();
+        mHelper=new SQLiteHelper(this);
+//        setNavigationView();
+        FirebaseCrash.log("Activity created");
         Log.i(TAG, "onCreate: ");
-        checkStoragePermission();
+        if (Build.VERSION.SDK_INT >= 23) {
+            checkStoragePermission();
+        }
+        Log.i(TAG, "onCreate: "+CommonUtils.doesDatabaseExist(this,SQLiteHelper.DATABASE_NAME));
         SharedPreferencesHandler.setImage(this, "Image", R.drawable.ic_hamburger);
     }
 
@@ -126,7 +142,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         DrawerLayout drawer = findViewById(R.id.drawerLayout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        View header=navigationView.getHeaderView(0);
+        View header = navigationView.getHeaderView(0);
         TextView ustext = header.findViewById(R.id.usname);
         TextView phtext = header.findViewById(R.id.phone);
         ustext.setText("Sam Martin");
@@ -142,7 +158,6 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     /*
       Ask permissions for Filestorage if device api > 23
        */
-    //  @TargetApi(Build.VERSION_CODES.M)
     private void checkStoragePermission() {
         boolean isExternalStorage = PermissionsAndroid.getInstance().checkWriteExternalStoragePermission(this);
         if (!isExternalStorage) {
@@ -155,10 +170,12 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         mToolbar = findViewById(R.id.toolbar);
         wallet = findViewById(R.id.wallet_balance);
         walletMsg = findViewById(R.id.wallet_balance_msg);
-        transfer = findViewById(R.id.transfer_bttn);
+        trnsfr_bttn = findViewById(R.id.transfer_bttn);
+        send_bttn = findViewById(R.id.send_bttn);
+        crash_bttn=findViewById(R.id.crash_bttn);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Wallet App");
-        walletMsg.setText(getResources().getString(R.string.your_wallet_balance)+": "+ "$");            //To be replaced with real time currency
+        walletMsg.setText(getResources().getString(R.string.your_wallet_balance) + ": " + "$");            //To be replaced with real time currency
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
@@ -172,6 +189,9 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         }
 //        sendCredits.setText("Send Credits");
         channel = manager.initialize(this, getMainLooper(), this);
+        if (!isWifiP2pEnabled) {
+            turnOnWifi();
+        }
         if (!wallet.getText().toString().equalsIgnoreCase("NA")) {
             wallet_curr = Integer.parseInt(wallet.getText().toString());
         }
@@ -181,13 +201,48 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
             SharedPreferencesHandler.setIntValues(this, "balance", newBal);
         }
 
+        crash_bttn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                throw new RuntimeException("This is a crash");
+            }
+        });
 
-        transfer.setOnClickListener(new View.OnClickListener() {
+        send_bttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!isWifiP2pEnabled) {
-                    Toast.makeText(WiFiDirectActivity.this, R.string.p2p_off_warning,
-                            Toast.LENGTH_SHORT).show();
+                    turnOnWifi();
+                } else {
+                    disconnect();
+                    DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
+                            .findFragmentById(R.id.frag_list);
+                    fragment.onInitiateDiscovery();
+                    manager.discoverPeers(channel, new ActionListener() {
+
+                        @Override
+                        public void onSuccess() {
+                            Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(int reasonCode) {
+                            Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+        });
+
+
+        trnsfr_bttn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isWifiP2pEnabled) {
+                    turnOnWifi();
                 } else {
                     disconnect();
                     DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
@@ -213,6 +268,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         });
     }
 
+    private void turnOnWifi() {
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
+    }
+
 
     /**
      * register the BroadcastReceiver with the intent values to be matched
@@ -220,9 +280,12 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     @Override
     public void onResume() {
         super.onResume();
-        supportInvalidateOptionsMenu();
+        wallet = findViewById(R.id.wallet_balance);
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
+        if (SharedPreferencesHandler.getSharedPreferences(this).contains("balance")) {
+            wallet.setText("" + SharedPreferencesHandler.getIntValues(this, "balance"));
+        }
     }
 
     @Override
@@ -250,51 +313,15 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.action_items, menu);
-        if (!isWifiP2pEnabled) {
-            menu.findItem(R.id.atn_direct_enable).setIcon(R.drawable.ic_wifi_grey_24dp);
-        } else {
-            menu.findItem(R.id.atn_direct_enable).setIcon(R.drawable.ic_wifi_black_24dp);
-        }
         return true;
     }
 
-
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.atn_direct_enable:
-                if (manager != null && channel != null) {
-
-                    // Since this is the system wireless settings activity, it's
-                    // not going to send us a result. We will be notified by
-                    // WiFiDeviceBroadcastReceiver instead.
-                    if (Build.MANUFACTURER.equalsIgnoreCase("Samsung")) {
-                        startActivity(new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK));
-                    } else {
-                        startActivity(new Intent(Settings.ACTION_WIFI_IP_SETTINGS));
-                    }
-                } else {
-                    Log.e(TAG, "channel or manager is null");
-                }
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
     @Override
     public void showDetails(WifiP2pDevice device, int position) {
         DeviceDetailFragment fragment = (DeviceDetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.frag_detail);
         fragment.showDetails(device, position);
-
     }
 
     @Override
@@ -303,6 +330,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
             @Override
             public void onSuccess() {
+                Log.i(TAG, "onSuccess: Accepted");
                 // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
                 DeviceListFragment.refreshList(config, drawableImg[setRandomIcon(position)], position);
 //                Toast.makeText(WiFiDirectActivity.this,"Image",Toast.LENGTH_LONG).show();
@@ -310,6 +338,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
             @Override
             public void onFailure(int reason) {
+                Log.i(TAG, "onSuccess: Rejected");
                 Toast.makeText(WiFiDirectActivity.this, "Connect failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
@@ -326,19 +355,56 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         final DeviceDetailFragment fragment = (DeviceDetailFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.frag_detail);
         fragment.resetViews();
-        manager.removeGroup(channel, new ActionListener() {
+        fragment.getView().setVisibility(View.GONE);
 
+        manager.requestGroupInfo(channel, new WifiP2pManager.GroupInfoListener() {
             @Override
-            public void onFailure(int reasonCode) {
-                Log.d(TAG, "Disconnect failed. Reason :" + reasonCode);
-            }
+            public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
+                if (wifiP2pGroup != null) {
+                    manager.removeGroup(channel, new ActionListener() {
 
-            @Override
-            public void onSuccess() {
-                fragment.getView().setVisibility(View.GONE);
-            }
+                        @Override
+                        public void onFailure(int reasonCode) {
+                            Log.d(TAG, "Disconnect failed. Reason :" + reasonCode);
+                        }
 
+                        @Override
+                        public void onSuccess() {
+                            //TODO
+
+                            fragment.getView().setVisibility(View.GONE);
+                        }
+
+                    });
+                } else {
+                    failedERROR = true;
+                    fragment.getView().setVisibility(View.GONE);
+                    Log.e(TAG, "onGroupInfoAvailable: Dismiss");
+                }
+            }
         });
+
+
+    }
+
+    /**
+     * To resolve error in disconnection returning response error code:2
+     */
+
+    private void deletePersistentGroups() {
+        try {
+            Method[] methods = WifiP2pManager.class.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                if (methods[i].getName().equals("deletePersistentGroup")) {
+                    // Delete any persistent group
+                    for (int netid = 0; netid < 32; netid++) {
+                        methods[i].invoke(manager, channel, netid, null);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -425,17 +491,23 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     }
 
 
-
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-
-
         DrawerLayout drawer = findViewById(R.id.drawerLayout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    @Override
+    public void walletBalanceUpdate(int amt) {
+        mAmtUpdated=amt;
+        Log.i(TAG, "walletBalanceUpdate: "+mAmtUpdated);
+        updateGoldTextView(amt);
+    }
+
+    public void updateGoldTextView(int goldAmount) {
+        wallet.setText(String.valueOf(goldAmount));
+    }
 
 }

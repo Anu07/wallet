@@ -20,6 +20,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -39,6 +40,7 @@ public class CommonUtils {
     public static final String DEVICETYPE = "Android";
     public static final String OFFLINE = "1";
     public static final String ONLINE = "2";
+    public static final String TRANSFERKEY = "credits";
     private static final String LOG = CommonUtils.class.getName();
     static Dialog verifydialog;
     private static final String TAG = CommonUtils.class.getName();
@@ -222,5 +224,16 @@ public class CommonUtils {
         return address;
     }
 
+    /**
+     * To check if databaase created successfully
+     * @param context
+     * @param dbName
+     * @return
+     */
 
+
+    public static boolean doesDatabaseExist(Context context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
+    }
 }

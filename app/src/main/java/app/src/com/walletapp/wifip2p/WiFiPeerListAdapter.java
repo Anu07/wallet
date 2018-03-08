@@ -5,6 +5,7 @@ package app.src.com.walletapp.wifip2p;
 
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 
 import java.util.List;
 
@@ -57,15 +57,35 @@ public class WiFiPeerListAdapter extends ArrayAdapter<WifiP2pDevice> {
             TextView bottom = v.findViewById(R.id.device_details);
             img = v.findViewById(R.id.icon);
             if (top != null) {
+                hot.setText(device.deviceAddress);
                 top.setText(device.deviceName);
             }
             if (bottom != null) {
-                bottom.setText(getDeviceStatus(device.status));
+                    bottom.setText(getDeviceStatus(device.status));
+                    bottom.setTextColor(getTextColor(device.status));
             }
             img.setImageResource(paths[position]);
         }
         return v;
 
+    }
+
+    private int getTextColor(int status) {
+        switch (status) {
+            case WifiP2pDevice.AVAILABLE:
+                return Color.GREEN;
+            case WifiP2pDevice.INVITED:
+                return Color.CYAN;
+            case WifiP2pDevice.CONNECTED:
+                return Color.BLUE;
+            case WifiP2pDevice.FAILED:
+                return Color.RED;
+            case WifiP2pDevice.UNAVAILABLE:
+                return Color.RED;
+            default:
+                return Color.RED;
+
+        }
     }
 
     public static String getDeviceStatus(int deviceStatus) {

@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.sql.SQLiteHelper;
 import app.src.com.walletapp.wifip2p.ChangeDeviceImage;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
@@ -118,6 +119,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         }
         peers.clear();
         peers.addAll(peerList.getDeviceList());
+        ((WiFiDirectActivity)getActivity()).mHelper.insertPeerRecord(peers);
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
         if (peers.size() == 0) {
             mOwnInfoListener.disConnectAll();
