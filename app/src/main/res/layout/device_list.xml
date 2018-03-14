@@ -62,17 +62,18 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_border_bacground"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/trnsfr_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/m_margin"
+            android:layout_margin="@dimen/s_margin"
             android:padding="@dimen/xs_padding"
+            android:textSize="18dp"
+            android:textStyle="bold"
             android:text="Transfer to New Subscriber"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/colorPrimaryDark" />
 
         <ImageView
             android:id="@+id/peer_list_show"
@@ -96,11 +97,15 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:textSize="15sp"
+            android:textStyle="bold"
             android:text="@string/label_peers" />
 
         <View
             android:layout_width="fill_parent"
             android:layout_height="1dp"
+            android:layout_marginTop="@dimen/s_margin"
+            android:layout_marginBottom="@dimen/s_margin"
             android:background="@android:color/holo_blue_light"
             android:gravity="center_vertical" />
 

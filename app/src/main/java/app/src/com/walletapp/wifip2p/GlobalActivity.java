@@ -29,6 +29,10 @@ import io.fabric.sdk.android.Fabric;
 public class GlobalActivity extends MultiDexApplication {
     private static Context context;
 
+
+
+    public static String userType;
+
     public static synchronized Context getGlobalContext() {
         return context;
     }
@@ -53,5 +57,13 @@ public class GlobalActivity extends MultiDexApplication {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
 }

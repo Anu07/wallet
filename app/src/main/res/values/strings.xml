@@ -18,11 +18,11 @@
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="client_text">This device will act as a client. Click on Gallery button to pick a local(stored) file</string>
-    <string name="empty_message">No devices found. Turn on P2P and perform discovery from the Action Bar</string>
+    <string name="empty_message">No devices found.</string>
     <string name="p2p_off_warning">Enable P2P from action bar button above or system settings</string>
     <string name="group_owner_text">"Am I the Group Owner? "</string>
     <string name="label_me">ME</string>
-    <string name="label_peers">PEERS</string>
+    <string name="label_peers">Nearby Devices</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
@@ -540,5 +540,7 @@
     <string name="password_empty">PAssword can\'t be empty</string>
     <string name="send">Send</string>
     <string name="recv">Recieve</string>
+    <string name="scan_qr_code">Scan QR code</string>
+    <string name="my_qr_code">My QR code</string>
 
 </resources>

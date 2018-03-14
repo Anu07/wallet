@@ -7,6 +7,6 @@ package app.src.com.walletapp.utils;
 public interface WalletBalanceListener {
 
 
-    void walletBalanceUpdate(int amt);
+    void walletBalanceUpdate(float amt);
 
 }

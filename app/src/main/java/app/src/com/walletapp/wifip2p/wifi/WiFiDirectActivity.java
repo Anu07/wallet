@@ -62,12 +62,18 @@ import app.src.com.walletapp.presenter.LoginPresenter;
 import app.src.com.walletapp.sql.SQLiteHelper;
 import app.src.com.walletapp.utils.CommonUtils;
 import app.src.com.walletapp.utils.WalletBalanceListener;
+import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
 import app.src.com.walletapp.wifip2p.utils.PermissionsAndroid;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
+import app.src.com.walletapp.wifip2p.utils.Utils;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.fabric.sdk.android.Fabric;
+
+import static app.src.com.walletapp.sql.SQLiteHelper.*;
 
 
 /**
@@ -77,12 +83,18 @@ import butterknife.ButterKnife;
  * The application should also register a BroadcastReceiver for notification of
  * WiFi state related events.
  */
-public class WiFiDirectActivity extends AppCompatActivity implements ChannelListener, DeviceActionListener,WalletBalanceListener,ShowMyInformation, NavigationView.OnNavigationItemSelectedListener {
+public class WiFiDirectActivity extends AppCompatActivity implements ChannelListener, DeviceActionListener, WalletBalanceListener, ShowMyInformation, NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.nav_view)
     NavigationView navView;
+    @BindView(R.id.scanqr)
+    Button scanqr;
+    @BindView(R.id.drawerLayout)
+    DrawerLayout drawerLayout;
+    @BindView(R.id.getownqr)
+    Button getownqr;
     private Toolbar mToolbar;
     public static final String TAG = "wifidirectdemo";
     private WifiP2pManager manager;
@@ -95,7 +107,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     static int[] drawableImg = {R.drawable.ic_steak, R.drawable.ic_hamburger, R.drawable.ic_broccoli};
     private TextView wallet;
     private Button sendCredits;
-    int wallet_curr;
+    float wallet_curr;
     private WifiP2pManager p2pManager;
     private Button trnsfr_bttn;
     private LinearLayout fragmentsLayout;
@@ -105,11 +117,10 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     FrameLayout mContainer;
     private TextView walletMsg;
     public boolean failedERROR = false;
-    private Button send_bttn;
-    private int mAmtUpdated=0;
+    private Button recieve_bttn;
+    private float mAmtUpdated = 0;
     public SQLiteHelper mHelper;
-    private Button crash_bttn;
-
+    WifiP2pDevice mDevice;
 
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
@@ -125,16 +136,25 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         setContentView(R.layout.main);
         ButterKnife.bind(this);
         initViews();
-        mHelper=new SQLiteHelper(this);
+        mHelper = new SQLiteHelper(this);
 //        setNavigationView();
         FirebaseCrash.log("Activity created");
         Log.i(TAG, "onCreate: ");
         if (Build.VERSION.SDK_INT >= 23) {
             checkStoragePermission();
         }
-        Log.i(TAG, "onCreate: "+CommonUtils.doesDatabaseExist(this,SQLiteHelper.DATABASE_NAME));
+        Log.i(TAG, "onCreate: " + CommonUtils.doesDatabaseExist(this, DATABASE_NAME));
         SharedPreferencesHandler.setImage(this, "Image", R.drawable.ic_hamburger);
+        Fabric.with(this, new Crashlytics());
+        mHelper = new SQLiteHelper(this);
+        mHelper.getAllDevices();
+
+        if(getIntent().hasExtra("QR")){
+            GlobalActivity.userType="S";
+            scanDevicesNearby();
+        }
     }
+
 
     private void setNavigationView() {
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -149,10 +169,6 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         phtext.setText("5014995222");
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-
     }
 
     /*
@@ -171,8 +187,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         wallet = findViewById(R.id.wallet_balance);
         walletMsg = findViewById(R.id.wallet_balance_msg);
         trnsfr_bttn = findViewById(R.id.transfer_bttn);
-        send_bttn = findViewById(R.id.send_bttn);
-        crash_bttn=findViewById(R.id.crash_bttn);
+        recieve_bttn = findViewById(R.id.recieve_bttn);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Wallet App");
         walletMsg.setText(getResources().getString(R.string.your_wallet_balance) + ": " + "$");            //To be replaced with real time currency
@@ -182,56 +197,46 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         if (!SharedPreferencesHandler.getSharedPreferences(this).contains("balance")) {
-            wallet.setText("100");
-            SharedPreferencesHandler.setIntValues(this, "balance", 100);
+            wallet.setText("100.00");
+            SharedPreferencesHandler.setFloatValues(this, "balance", 100f);
         } else {
-            wallet.setText(Integer.toString(SharedPreferencesHandler.getSharedPreferences(this).getInt("balance", 100)));
+            wallet.setText(""+(SharedPreferencesHandler.getFloatValues(this,"balance")));
         }
-//        sendCredits.setText("Send Credits");
         channel = manager.initialize(this, getMainLooper(), this);
         if (!isWifiP2pEnabled) {
             turnOnWifi();
         }
         if (!wallet.getText().toString().equalsIgnoreCase("NA")) {
-            wallet_curr = Integer.parseInt(wallet.getText().toString());
+            wallet_curr = Float.parseFloat(wallet.getText().toString());
         }
         if (getIntent().hasExtra("balance")) {
-            int newBal = wallet_curr + getIntent().getIntExtra("balance", 0);
-            wallet.setText(Integer.toString(newBal));
-            SharedPreferencesHandler.setIntValues(this, "balance", newBal);
+            float newBal = wallet_curr + getIntent().getIntExtra("balance", 0);
+            wallet.setText(""+newBal);
+            SharedPreferencesHandler.setFloatValues(this, "balance", newBal);
         }
 
-        crash_bttn.setOnClickListener(new View.OnClickListener() {
+        scanqr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                throw new RuntimeException("This is a crash");
+                Bundle bundle=new Bundle();
+                bundle.putParcelable("device",mDevice);
+                Fragment barcodeFrag=new BarcodeFragment();
+                barcodeFrag.setArguments(bundle);
+                getSupportFragmentManager().beginTransaction().add(R.id.container, barcodeFrag).addToBackStack("qr").commit();
             }
         });
 
-        send_bttn.setOnClickListener(new View.OnClickListener() {
+        recieve_bttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                GlobalActivity.userType="R";            //setting usertype to reciever
+
                 if (!isWifiP2pEnabled) {
                     turnOnWifi();
                 } else {
                     disconnect();
-                    DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
-                            .findFragmentById(R.id.frag_list);
-                    fragment.onInitiateDiscovery();
-                    manager.discoverPeers(channel, new ActionListener() {
-
-                        @Override
-                        public void onSuccess() {
-                            Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onFailure(int reasonCode) {
-                            Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    scanDevicesNearby();
                 }
             }
 
@@ -241,30 +246,36 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         trnsfr_bttn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                GlobalActivity.userType="S";            //set user type to sender
                 if (!isWifiP2pEnabled) {
                     turnOnWifi();
                 } else {
                     disconnect();
-                    DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
-                            .findFragmentById(R.id.frag_list);
-                    fragment.onInitiateDiscovery();
-                    manager.discoverPeers(channel, new ActionListener() {
-
-                        @Override
-                        public void onSuccess() {
-                            Toast.makeText(WiFiDirectActivity.this, "Discovery Initiated",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onFailure(int reasonCode) {
-                            Toast.makeText(WiFiDirectActivity.this, "Discovery Failed : " + reasonCode,
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    scanDevicesNearby();
                 }
             }
 
+        });
+    }
+
+    public void scanDevicesNearby() {
+        DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_list);
+        fragment.onInitiateDiscovery();
+        manager.discoverPeers(channel, new ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                Toast.makeText(WiFiDirectActivity.this, "Scanning nearby devices....",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(int reasonCode) {
+                Toast.makeText(WiFiDirectActivity.this, "Scanning failed : " + reasonCode,
+                        Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -284,7 +295,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
         if (SharedPreferencesHandler.getSharedPreferences(this).contains("balance")) {
-            wallet.setText("" + SharedPreferencesHandler.getIntValues(this, "balance"));
+            wallet.setText(Utils.getFloatFormatter(SharedPreferencesHandler.getFloatValues(this, "balance")));
         }
     }
 
@@ -483,6 +494,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         view.setText(WiFiPeerListAdapter.getDeviceStatus(device.status));
         ImageView img = findViewById(R.id.icon);
         img.setImageResource(R.drawable.ic_hamburger);
+        mDevice=device;
     }
 
     @Override
@@ -500,14 +512,55 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     }
 
     @Override
-    public void walletBalanceUpdate(int amt) {
-        mAmtUpdated=amt;
-        Log.i(TAG, "walletBalanceUpdate: "+mAmtUpdated);
-        updateGoldTextView(amt);
+    public void walletBalanceUpdate(float amt) {
+        mAmtUpdated = amt;
+        Log.i(TAG, "walletBalanceUpdate: " + mAmtUpdated);
+        updateGoldTextView(mAmtUpdated);
     }
 
-    public void updateGoldTextView(int goldAmount) {
-        wallet.setText(String.valueOf(goldAmount));
+    public void updateGoldTextView(float goldAmount) {
+        wallet.setText(Utils.getFloatFormatter(goldAmount));
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @OnClick(R.id.getownqr)
+    public void onViewClicked() {
+        Bundle bundle=new Bundle();
+        bundle.putString("QRgen","qrgenerate");
+        bundle.putParcelable("device",mDevice);
+        Fragment barCode=new BarcodeFragment();
+        barCode.setArguments(bundle);
+        getSupportFragmentManager().beginTransaction().add(R.id.container, barCode).commit();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if(getSupportFragmentManager().getBackStackEntryCount()>1){
+            getSupportFragmentManager().popBackStackImmediate();
+        }else{
+            super.onBackPressed();
+        }
+    }
+
+    public void scanSilentlyDevicesNearby() {
+        DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_list);
+//        fragment.onInitiateDiscovery();
+        manager.discoverPeers(channel, new ActionListener() {
+
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onFailure(int reasonCode) {
+            }
+        });
+
+    }
 }

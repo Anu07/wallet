@@ -38,8 +38,10 @@ import java.util.List;
 
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.sql.SQLiteHelper;
+import app.src.com.walletapp.utils.MyPreferences;
 import app.src.com.walletapp.wifip2p.ChangeDeviceImage;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
+import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
 
 
@@ -119,7 +121,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         }
         peers.clear();
         peers.addAll(peerList.getDeviceList());
-        ((WiFiDirectActivity)getActivity()).mHelper.insertPeerRecord(peers);
+        ((WiFiDirectActivity)getActivity()).mHelper.insertPeerRecord(peers, SharedPreferencesHandler.getFloatValues(getActivity(),"balance"));
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
         if (peers.size() == 0) {
             mOwnInfoListener.disConnectAll();
@@ -141,7 +143,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
-        progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel", "finding peers", true,
+        progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel", "finding nearby devices", true,
                 true, new DialogInterface.OnCancelListener() {
 
                     @Override

@@ -124,7 +124,7 @@
                         android:textColor="@color/colorPrimary" />
 
                     <Button
-                        android:id="@+id/send_bttn"
+                        android:id="@+id/recieve_bttn"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
@@ -133,23 +133,38 @@
                         android:background="@drawable/rounded_border_bacground"
                         android:text="@string/recv"
                         android:textColor="@color/colorPrimary" />
+
+
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/crash_bttn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="5dp"
-                    android:background="@drawable/rounded_border_bacground"
-                    android:text="@string/recv"
-                    android:textColor="@color/colorPrimary" />
 
                 <LinearLayout
                     android:id="@+id/fragmentsLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/scanqr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
+                        android:background="@drawable/rounded_border_bacground"
+                        android:text="@string/scan_qr_code"
+                        android:textColor="@color/colorPrimary" />
+
+                    <Button
+                        android:id="@+id/getownqr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_marginTop="5dp"
+                        android:background="@drawable/rounded_border_bacground"
+                        android:text="@string/my_qr_code"
+                        android:textColor="@color/colorPrimary" />
 
                     <fragment
                         android:id="@+id/frag_list"

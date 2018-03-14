@@ -23,14 +23,14 @@ public class SharedPreferencesHandler {
 		return getSharedPreferences(ctx).getString(key, null);
 	}
 
-	public static void setIntValues(Context ctx, String key, int DataToSave) {
+	public static void setFloatValues(Context ctx, String key, float DataToSave) {
 		Editor editor = getSharedPreferences(ctx).edit();
-		editor.putInt(key, DataToSave);
+		editor.putFloat(key, DataToSave);
 		editor.commit();
 	}
 
-	public static int getIntValues(Context ctx, String key) {
-		return getSharedPreferences(ctx).getInt(key, 0);
+	public static float getFloatValues(Context ctx, String key) {
+		return getSharedPreferences(ctx).getFloat(key, 0);
 	}
 	
 	public static void setBooleanValues(Context ctx, String key, Boolean DataToSave) {

@@ -42,9 +42,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
@@ -55,7 +55,6 @@ import app.src.com.walletapp.utils.RandomString;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
 
 import static android.content.Context.WIFI_P2P_SERVICE;
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
 import static android.os.Looper.getMainLooper;
 import static app.src.com.walletapp.wifip2p.wifi.DeviceDetailFragment.FolderName;
 
@@ -199,7 +198,7 @@ public class Utils {
             writer.append(sBody);
             writer.flush();
             writer.close();
-            Toast.makeText(context, "Saved" + gpxfile.getName(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "Saved" + gpxfile.getName(), Toast.LENGTH_SHORT).show();
             return Uri.fromFile(gpxfile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -477,6 +476,16 @@ public class Utils {
         View sbView = snackBar.getView();
         sbView.setBackgroundColor(ContextCompat.getColor(v.getContext(), R.color.colorPrimary));
         snackBar.show();
+    }
+
+    /**get float formatter
+     *
+     */
+    public static String getFloatFormatter(Float val){
+        NumberFormat formatter = NumberFormat.getNumberInstance();
+        formatter.setMinimumFractionDigits(2);
+        formatter.setMaximumFractionDigits(2);
+        return formatter.format(val);
     }
 
 }

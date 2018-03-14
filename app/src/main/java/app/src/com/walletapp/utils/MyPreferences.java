@@ -18,7 +18,7 @@ public class MyPreferences {
     private MyPreferences(){ }
 
     public enum Keys{
-        USERID,LOGINSTATUS, Country, Language, Currency, DeviceToken, PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, LOGINRESPONSE
+        USERID,LOGINSTATUS, Country, Language, Currency, DeviceToken, PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, QrImage, LOGINRESPONSE
     }
 
     public static MyPreferences getInstance(){

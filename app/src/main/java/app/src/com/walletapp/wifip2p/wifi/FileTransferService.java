@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
+import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.beans.WiFiTransferModal;
 
 
@@ -88,8 +89,6 @@ public class FileTransferService extends IntentService {
                  WiFiTransferModal transObj = null;
                  ObjectOutputStream oos = new ObjectOutputStream(stream);
                  if(transObj == null) transObj = new WiFiTransferModal();
-                 
-                 
                  transObj = new WiFiTransferModal(extension,FileLength);
                  oos.writeObject(transObj);
                  
@@ -104,11 +103,14 @@ public class FileTransferService extends IntentService {
             } catch (IOException e) {
                 Log.e(WiFiDirectActivity.TAG, e.getMessage());
                 e.printStackTrace();
-                CommonMethods.e("Unable to connect host", "service socket error in wififiletransferservice class");
+                CommonMethods.e("Unable to connect host", "service socket error in wifi filetransferservice class");
            	 mHandler.post(new Runnable() {
 					
 					public void run() {
 						// TODO Auto-generated method stub
+                        Intent local = new Intent();
+                        local.setAction("com.hello.action");
+                        GlobalActivity.getGlobalContext().sendBroadcast(local);
 						Toast.makeText(FileTransferService.this, "Paired Device is not Ready to receive the file", Toast.LENGTH_LONG).show();
 					}
            	 });

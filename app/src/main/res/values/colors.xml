@@ -7,4 +7,5 @@
     <color name="colorPrimaryLight">#4e8e96</color>
     <color name="light_blue">#B9E6E7</color>
     <color name="colorPrimaryDarkLight">#72d0a6</color>
+    <color name="headerBackground">#143953</color>
 </resources>
