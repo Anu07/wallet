@@ -6,14 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import app.src.com.walletapp.model.onlinepayment.Payment;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
+import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 
 import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
@@ -39,8 +39,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String KEY_SENDER_DEVICE_ID = "senderDeviceId";
     private static final String KEY_INDEX = "keyindex";
     private static final String KEY_BALANCE = "balance";
+    private static final String KEY_TYPE = "user_type";             //0 for sender and 1 for receiver
+    private static final String KEY_BAL_LEFT = "bal_left";
     private static SQLiteDatabase database;
-    private static List<String> list=new ArrayList<>();
+    private static List<String> list = new ArrayList<>();
 
     public SQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,8 +50,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("create table " + TBL_USERDATA + " ( " + KEY_INDEX + " VARCHAR PRIMARY KEY ," + KEY_DEVICE_ID + " VARCHAR," + KEY_USERPHONE + " VARCHAR, " + KEY_PHONESTATUS + " VARCHAR);");
-        sqLiteDatabase.execSQL("create table " + TBL_USERTXN + " ( " + KEY_TXN_ID + " VARCHAR PRIMARY KEY ," + KEY_RECEIVER_USERPHONE + " VARCHAR, " + KEY_AMT_SENT + " VARCHAR, " + KEY_RECEIVER_DEVICE_ID + " VARCHAR, " + KEY_SENDER_DEVICE_ID + " VARCHAR, " + KEY_BALANCE + " VARCHAR);");
+        sqLiteDatabase.execSQL("create table " + TBL_USERDATA +" ( " + KEY_INDEX + " VARCHAR PRIMARY KEY                          \n" +
+                "   AUTOINCREMENT," + KEY_DEVICE_ID + " VARCHAR," + KEY_USERPHONE + " VARCHAR, " + KEY_PHONESTATUS + " VARCHAR, " + KEY_TYPE + " VARCHAR);");
+        sqLiteDatabase.execSQL("create table " + TBL_USERTXN + " ( " + KEY_TXN_ID + " VARCHAR PRIMARY KEY ," + KEY_RECEIVER_USERPHONE + " VARCHAR, " + KEY_AMT_SENT + " VARCHAR, " + KEY_RECEIVER_DEVICE_ID + " VARCHAR, " + KEY_SENDER_DEVICE_ID + " VARCHAR, " + KEY_BAL_LEFT + " VARCHAR);");
     }
 
     @Override
@@ -60,33 +63,50 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     }
 
 
-    public void insertPeerRecord(List<WifiP2pDevice> device,float balance) {
-        try {
-            database = this.getReadableDatabase();
-            ContentValues contentValues = new ContentValues();
-            for (int i = 0; i < device.size(); i++) {
-                contentValues.put(KEY_INDEX, i);
-                contentValues.put(KEY_DEVICE_ID, device.get(i).deviceAddress);
-                contentValues.put(KEY_USERPHONE, device.get(i).deviceName);
-                contentValues.put(KEY_PHONESTATUS, device.get(i).status);
-                contentValues.put(KEY_BALANCE,balance);
-                database.insert(TBL_USERDATA, null, contentValues);
+    public boolean insertPeerRecord(List<WifiP2pDevice> device, float balance, Context context) {
+        database = this.getReadableDatabase();
+        ContentValues contentValues = new ContentValues();
+        for (int i = 0; i < device.size(); i++) {
+            contentValues.put(KEY_INDEX, i);
+            if(i==0 && device.get(0).deviceAddress== SharedPreferencesHandler.getStringValues(context,"ownAddress")){
+                contentValues.put(KEY_BALANCE, balance);
+                contentValues.put(KEY_TYPE, "1");
+            }else{
+                contentValues.put(KEY_BALANCE, "0");
+                contentValues.put(KEY_TYPE, "1");
             }
-            database.close();
-        } catch (Exception e) {
-            Log.e(TAG, "insertRecord: " + e.getMessage());
+            contentValues.put(KEY_DEVICE_ID, device.get(i).deviceAddress);
+            contentValues.put(KEY_USERPHONE, device.get(i).deviceName);
+            contentValues.put(KEY_PHONESTATUS, device.get(i).status);
         }
-        Log.i(TAG, "insertPeerRecord: "+database.getPath());
+        long result = database.insert(TBL_USERDATA, null, contentValues);
+        database.close();
+        Log.i(TAG, "insertPeerRecord: " + database.getPath());
+        if (result == -1) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
-    public void saveTxnDetails(String txnId, String amtEntered, String deviceAddress, String s) {
+
+    public void saveTxnDetails(String txnId, String amtEntered, String deviceAddress, Context context) {
         try {
             database = this.getReadableDatabase();
             ContentValues contentValues = new ContentValues();
-            contentValues.put(KEY_TXN_ID,txnId);
-            contentValues.put(KEY_RECEIVER_DEVICE_ID,deviceAddress);
-            contentValues.put(KEY_AMT_SENT,amtEntered);
-            contentValues.put(KEY_SENDER_DEVICE_ID,s);
+            contentValues.put(KEY_TXN_ID, txnId);
+            if(GlobalActivity.userType.equalsIgnoreCase("S")){
+                contentValues.put(KEY_SENDER_DEVICE_ID, SharedPreferencesHandler.getStringValues(context,"ownAddress"));
+                contentValues.put(KEY_RECEIVER_DEVICE_ID, deviceAddress);
+
+            }else{
+                contentValues.put(KEY_SENDER_DEVICE_ID, deviceAddress);
+                contentValues.put(KEY_RECEIVER_DEVICE_ID, SharedPreferencesHandler.getStringValues(context,"ownAddress"));
+            }
+
+            contentValues.put(KEY_AMT_SENT, amtEntered);
+            contentValues.put(KEY_BAL_LEFT, SharedPreferencesHandler.getFloatValues(context,"balance"));
             database.insert(TBL_USERTXN, null, contentValues);
             database.close();
         } catch (Exception e) {
@@ -95,15 +115,15 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     }
 
 
-    public void updateDetails(String deviceAddress,String updatedBalance){
-        String strSQL = "UPDATE"+TBL_USERDATA+" SET "+KEY_DEVICE_ID+" = "+deviceAddress+" WHERE "+KEY_BALANCE+" = "+ updatedBalance;
+    public void updateDetails(String deviceAddress, String updatedBalance) {
+        String strSQL = "UPDATE" + TBL_USERDATA + " SET " + KEY_DEVICE_ID + " = " + deviceAddress + " WHERE " + KEY_BALANCE + " = " + updatedBalance;
         database.execSQL(strSQL);
     }
 
 
-    public void getAllDevices(){
+    public void getAllDevices() {
         database = this.getReadableDatabase();
-        Cursor cursor = database.rawQuery("select * from "+TBL_USERTXN,null);
+        Cursor cursor = database.rawQuery("select * from " + TBL_USERTXN, null);
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
                 String name = cursor.getString(cursor.getColumnIndex(KEY_TXN_ID));
@@ -111,8 +131,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
         }
-        Log.i(TAG, "getAllDevices: "+list.size());
+        Log.i(TAG, "getAllDevices: " + list.size());
     }
+
+    public Integer deleteData(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(TBL_USERDATA, "ID = ?", new String[]{id});
+    }
+
 }
 
 

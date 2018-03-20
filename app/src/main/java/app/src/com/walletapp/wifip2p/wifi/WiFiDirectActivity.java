@@ -147,7 +147,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         SharedPreferencesHandler.setImage(this, "Image", R.drawable.ic_hamburger);
         Fabric.with(this, new Crashlytics());
         mHelper = new SQLiteHelper(this);
-        mHelper.getAllDevices();
+//        mHelper.getAllDevices();
 
         if(getIntent().hasExtra("QR")){
             GlobalActivity.userType="S";
@@ -494,6 +494,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         view.setText(WiFiPeerListAdapter.getDeviceStatus(device.status));
         ImageView img = findViewById(R.id.icon);
         img.setImageResource(R.drawable.ic_hamburger);
+        SharedPreferencesHandler.setStringValues(WiFiDirectActivity.this,"ownAddress",device.deviceAddress);
         mDevice=device;
     }
 

@@ -40,9 +40,12 @@ import app.src.com.walletapp.R;
 import app.src.com.walletapp.sql.SQLiteHelper;
 import app.src.com.walletapp.utils.MyPreferences;
 import app.src.com.walletapp.wifip2p.ChangeDeviceImage;
+import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
+
+import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 
 /**
@@ -61,6 +64,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private LinearLayout peersLay;
     private ListView PeerList;
     ShowMyInformation mOwnInfoListener;
+    private SQLiteHelper myDb;
 
     public DeviceListFragment() {
     }
@@ -121,14 +125,29 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         }
         peers.clear();
         peers.addAll(peerList.getDeviceList());
-        ((WiFiDirectActivity)getActivity()).mHelper.insertPeerRecord(peers, SharedPreferencesHandler.getFloatValues(getActivity(),"balance"));
+        addDeviceDataToTable(peers);
         ((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
         if (peers.size() == 0) {
             mOwnInfoListener.disConnectAll();
-            Log.d(WiFiDirectActivity.TAG, "No devices found");
+            Log.d(TAG, "No devices found");
             return;
         }
 
+
+        //TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+        if(GlobalActivity.getAddressScanned()!=null && !GlobalActivity.getAddressScanned().equalsIgnoreCase("")){
+            for (int i = 0; i < peers.size(); i++) {
+                if(peers.get(i).deviceAddress.equalsIgnoreCase(GlobalActivity.getAddressScanned())){
+//                    DeviceDetailFragment fragment=getActivity().getFragmentManager().findFragmentById(R.id.device_detail_container);
+                }
+            }
+        }
+
+    }
+
+    private void addDeviceDataToTable(List<WifiP2pDevice> peers) {
+        myDb = new SQLiteHelper(getActivity());
+        Log.i(TAG, "addDeviceDataToTable: "+myDb.insertPeerRecord(peers,SharedPreferencesHandler.getFloatValues(getActivity(),"balance"),getActivity()));
     }
 
     public void clearPeers() {

@@ -65,7 +65,6 @@
                 android:layout_gravity="center_horizontal"
                 android:imeOptions="actionDone"
                 android:inputType="numberDecimal"
-                android:maxLength="4"
                 android:paddingLeft="5dp" />
         </android.support.design.widget.TextInputLayout>
 

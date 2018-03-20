@@ -72,6 +72,7 @@ import java.util.List;
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.model.onlinepayment.OnlinePaymentRequest;
 import app.src.com.walletapp.model.onlinepayment.Payment;
+import app.src.com.walletapp.utils.DecimalFilter;
 import app.src.com.walletapp.utils.MyPreferences;
 import app.src.com.walletapp.utils.WalletBalanceListener;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
@@ -92,7 +93,7 @@ import static app.src.com.walletapp.utils.CommonUtils.getUniqueDeviceId;
  * A fragment that manages a particular peer and allows interaction with device
  * i.e. setting up network connection and transferring data.
  */
-public class DeviceDetailFragment extends Fragment implements ConnectionInfoListener, FilePickerCallback {
+public class DeviceDetailFragment extends Fragment implements ConnectionInfoListener, FilePickerCallback ,DeviceActionListener{
 
     private static float val;
     private static String senderName;
@@ -119,7 +120,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     int position;
     private Uri MsgUri;
     private Button sendBttn;
-    private TextView amtEntered;
+    private EditText amtEntered;
     ProgressDialog pDial;
     private float leftBalance;
     static Context ctx;
@@ -224,48 +225,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         });
 
         //restricting user to not enter more than 2 decimal places
-        amtEntered.addTextChangedListener(new TextWatcher() {
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2,int arg3) {
-
-            }
-            public void beforeTextChanged(CharSequence arg0, int arg1,int arg2, int arg3) {
-
-            }
-
-            public void afterTextChanged(Editable arg0) {
-                if (arg0.length() > 0) {
-                    String str = amtEntered.getText().toString();
-                    amtEntered.setOnKeyListener(new View.OnKeyListener() {
-                        public boolean onKey(View v, int keyCode, KeyEvent event) {
-                            if (keyCode == KeyEvent.KEYCODE_DEL) {
-                                count--;
-                                InputFilter[] fArray = new InputFilter[1];
-                                fArray[0] = new InputFilter.LengthFilter(100);
-                                amtEntered.setFilters(fArray);
-                                //change the edittext's maximum length to 100.
-                                //If we didn't change this the edittext's maximum length will
-                                //be number of digits we previously entered.
-                            }
-                            return false;
-                        }
-                    });
-                    char t = str.charAt(arg0.length() - 1);
-                    if (t == '.') {
-                        count = 0;
-                    }
-                    if (count >= 0) {
-                        if (count == 2) {
-                            InputFilter[] fArray = new InputFilter[1];
-                            fArray[0] = new InputFilter.LengthFilter(arg0.length());
-                            amtEntered.setFilters(fArray);
-                            //prevent the edittext from accessing digits
-                            //by setting maximum length as total number of digits we typed till now.
-                        }
-                        count++;
-                    }
-                }
-            }
-        });
+      amtEntered.addTextChangedListener(new DecimalFilter(amtEntered,getActivity()));
         unbinder = ButterKnife.bind(this, mContentView);
         return mContentView;
     }
@@ -279,7 +239,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         if (!amtEntered.getText().toString().equalsIgnoreCase("") && Float.parseFloat(amtEntered.getText().toString()) < SharedPreferencesHandler.getFloatValues(getActivity(), "balance") && Float.parseFloat(amtEntered.getText().toString()) > 0 &&Float.parseFloat(amtEntered.getText().toString()) != 0) {
             pDial.show();
             TxnId = Utils.getTransactionId();
-            ((WiFiDirectActivity)getActivity()).mHelper.saveTxnDetails(TxnId,amtEntered.getText().toString(),device.deviceAddress,"My device");
+            ((WiFiDirectActivity)getActivity()).mHelper.saveTxnDetails(TxnId,amtEntered.getText().toString(),device.deviceAddress,getActivity());
             sendTextMsg("Transaction Id:" + TxnId + "," + "" + "," + amtEntered.getText().toString());
         } else {
             Utils.showSnackBar(getView(), "Invalid amount");
@@ -295,8 +255,12 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         this.info = info;
         this.getView().setVisibility(View.VISIBLE);
         Log.i(TAG, "onConnectionInfoAvailable: now");
-        if(device !=null && device.status==3){       //connected
+        if(device !=null && device.status==3 && GlobalActivity.userType.equalsIgnoreCase("S")){       //connected
             creditsLay.setVisibility(View.VISIBLE);
+            sendBttn.setVisibility(View.GONE);
+            btnConnect.setVisibility(View.GONE);
+        }else if(device!=null && device.status ==3  && GlobalActivity.userType.equalsIgnoreCase("R")){
+            creditsLay.setVisibility(View.GONE);
             sendBttn.setVisibility(View.GONE);
             btnConnect.setVisibility(View.GONE);
         }
@@ -408,8 +372,10 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         Log.i(TAG, "showDetails: "+GlobalActivity.userType);
         if(GlobalActivity.userType.equalsIgnoreCase("S")){
             connectDiscnnct.setVisibility(View.VISIBLE);
+            creditsLay.setVisibility(View.GONE);
         }else{
             connectDiscnnct.setVisibility(View.GONE);
+            creditsLay.setVisibility(View.GONE);
         }
        /* if (device.status ==3) {
             connectDiscnnct.setVisibility(View.VISIBLE);
@@ -419,6 +385,35 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         }*/
     }
 
+    @Override
+    public void cancelDisconnect() {
+
+    }
+
+    @Override
+    public void connect(WifiP2pConfig device, int position) {
+        WifiP2pConfig config = new WifiP2pConfig();
+        if (config != null && config.deviceAddress != null && device != null) {
+            config.deviceAddress = device.deviceAddress;
+            config.wps.setup = WpsInfo.PBC;
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+            progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
+                    "Connecting to :" + device.deviceAddress, true, true
+            );
+
+            //send dynamic image
+            ((DeviceActionListener) getActivity()).connect(config, position);
+        } else {
+
+        }
+    }
+
+    @Override
+    public void disconnect() {
+        ((DeviceActionListener) getActivity()).disconnect();
+    }
 
 
     /**
@@ -547,15 +542,17 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     }
 
     private void updateValuesafterCreditsSent() {
-        leftBalance =(float)(SharedPreferencesHandler.getFloatValues(getActivity(), "balance") - Float.parseFloat(amtEntered.getText().toString()));
-        Log.i(TAG, "onEditorAction: " + leftBalance);
-        amountSent=Float.parseFloat(amtEntered.getText().toString());
-        Log.i(TAG, "updateValuesafterCreditsSent: amount"+amountSent);
-        SharedPreferencesHandler.setFloatValues(getActivity(), "balance", leftBalance);
-        pDial.dismiss();
-        mListener.walletBalanceUpdate(SharedPreferencesHandler.getFloatValues(getActivity(), "balance"));
-        Log.i(TAG, "updateValuesafterCreditsSent: " + SharedPreferencesHandler.getFloatValues(getActivity(), "balance"));
-        amtEntered.setText("");
+        if(!amtEntered.getText().toString().equalsIgnoreCase("")){
+            leftBalance = SharedPreferencesHandler.getFloatValues(getActivity(), "balance") - Float.parseFloat(amtEntered.getText().toString());
+            Log.i(TAG, "onEditorAction: " + leftBalance);
+            amountSent=Float.parseFloat(amtEntered.getText().toString());
+            Log.i(TAG, "updateValuesafterCreditsSent: amount"+amountSent);
+            SharedPreferencesHandler.setFloatValues(getActivity(), "balance", leftBalance);
+            pDial.dismiss();
+            mListener.walletBalanceUpdate(SharedPreferencesHandler.getFloatValues(getActivity(), "balance"));
+            Log.i(TAG, "updateValuesafterCreditsSent: " + SharedPreferencesHandler.getFloatValues(getActivity(), "balance"));
+            amtEntered.setText("");
+        }
     }
 
 
@@ -924,10 +921,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
     public static void DismissProgressDialog() {
         try {
-            if (mProgressDialog != null) {
-                if (mProgressDialog.isShowing()) {
+            if (mProgressDialog != null && mProgressDialog.isShowing()) {
                     mProgressDialog.dismiss();
-                }
             }
         } catch (Exception e) {
             // TODO: handle exception
@@ -954,7 +949,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         protected String doInBackground(String... params) {
             // TODO Auto-generated method stub
             CommonMethods.e("On first Connect", "On first Connect");
-
             Intent serviceIntent = new Intent(getActivity(),
                     WiFiClientIPTransferService.class);
 
@@ -1005,16 +999,16 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             @Override
             public void onReceive(Context context, Intent intent) {
                 //UI update here
+                Log.i(TAG, "onReceive: Device not available");
                 bal = SharedPreferencesHandler.getFloatValues(context, "balance") + amountSent;
                 Log.e(TAG, "onReceive: "+bal+"~~~~~"+amountSent);
                 amountSent=0;
+                SharedPreferencesHandler.setFloatValues(getContext(),"balance",bal);        //saved updated values
                 mListener.walletBalanceUpdate(bal);
+                ((DeviceActionListener) getActivity()).disconnect();
             }
         };
         getActivity().registerReceiver(updateUIReciver,filter);
     }
-
-
-
 
 }

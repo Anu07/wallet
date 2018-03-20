@@ -47,7 +47,6 @@ public class BarcodeFragment extends BaseFragment implements BarcodeReader.Barco
     private static ProgressDialog progressDialogStat;
 
 
-
     public BarcodeFragment() {
         // Required empty public constructor
     }
@@ -94,7 +93,7 @@ public class BarcodeFragment extends BaseFragment implements BarcodeReader.Barco
             @Override
             public void run() {
                 Toast.makeText(getActivity(), "Barcode: " + barcode.displayValue, Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getActivity(),WiFiDirectActivity.class).putExtra("QR",""));
+                startActivity(new Intent(getActivity(), WiFiDirectActivity.class).putExtra("QR", ""));
             }
         });
     }
@@ -109,12 +108,8 @@ public class BarcodeFragment extends BaseFragment implements BarcodeReader.Barco
         }
 
         final String finalCodes = codes;
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getActivity(), "Barcodes: " + finalCodes, Toast.LENGTH_SHORT).show();
-            }
-        });
+
+        Toast.makeText(getActivity(), "Barcodes: " + finalCodes, Toast.LENGTH_SHORT).show();
     }
 
     @Override

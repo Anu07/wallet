@@ -28,10 +28,12 @@ import io.fabric.sdk.android.Fabric;
  */
 public class GlobalActivity extends MultiDexApplication {
     private static Context context;
-
-
-
     public static String userType;
+
+
+
+    public static String addressScanned;
+
 
     public static synchronized Context getGlobalContext() {
         return context;
@@ -66,4 +68,13 @@ public class GlobalActivity extends MultiDexApplication {
     public void setUserType(String userType) {
         this.userType = userType;
     }
+
+    public static String getAddressScanned() {
+        return addressScanned;
+    }
+
+    public static void setAddressScanned(String addressScanned) {
+        GlobalActivity.addressScanned = addressScanned;
+    }
+
 }
