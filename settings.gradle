@@ -1,1 +1,1 @@
-include ':app', ':multipicker', ':barcode-reader'
+include ':app', ':multipicker', ':zxing-sample', ':core', ':zbar-sample', ':zbar', ':zxing'

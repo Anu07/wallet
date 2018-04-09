@@ -31,6 +31,7 @@ import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -121,6 +122,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     private float mAmtUpdated = 0;
     public SQLiteHelper mHelper;
     WifiP2pDevice mDevice;
+    private boolean doubleBackToExitPressedOnce=false;
 
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
@@ -292,7 +294,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     public void onResume() {
         super.onResume();
         wallet = findViewById(R.id.wallet_balance);
-        receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
+//        receiver = new WiFiDirectBroadcastReceiver(manager, channel, this);
         registerReceiver(receiver, intentFilter);
         if (SharedPreferencesHandler.getSharedPreferences(this).contains("balance")) {
             wallet.setText(Utils.getFloatFormatter(SharedPreferencesHandler.getFloatValues(this, "balance")));
@@ -397,6 +399,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
 
     }
+
 
     /**
      * To resolve error in disconnection returning response error code:2
@@ -517,6 +520,7 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         mAmtUpdated = amt;
         Log.i(TAG, "walletBalanceUpdate: " + mAmtUpdated);
         updateGoldTextView(mAmtUpdated);
+
     }
 
     public void updateGoldTextView(float goldAmount) {
@@ -541,10 +545,24 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
     @Override
     public void onBackPressed() {
-        if(getSupportFragmentManager().getBackStackEntryCount()>1){
-            getSupportFragmentManager().popBackStackImmediate();
-        }else{
-            super.onBackPressed();
+        if (getFragmentManager().getBackStackEntryCount() > 0) {
+            getFragmentManager().popBackStack();
+        } else {
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                return;
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce=false;
+                }
+            }, 2000);
         }
     }
 

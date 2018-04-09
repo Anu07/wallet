@@ -533,7 +533,7 @@
     <string name="logout">LogOut</string>
     <string name="settings">Settings</string>
     <string name="transfer">Transfer</string>
-    <string name="your_wallet_balance">Wallet Balance</string>
+    <string name="your_wallet_balance">Total available balance to pay</string>
     <string name="profile">Profile</string>
     <string name="update_pin">Update Pin</string>
     <string name="transaction_history">Transaction History</string>
@@ -542,5 +542,6 @@
     <string name="recv">Recieve</string>
     <string name="scan_qr_code">Scan QR code</string>
     <string name="my_qr_code">My QR code</string>
+    <string name="register"><u>Create an Account</u></string>
 
 </resources>

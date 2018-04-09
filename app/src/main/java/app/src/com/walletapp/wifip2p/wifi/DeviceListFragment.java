@@ -16,29 +16,31 @@
 
 package app.src.com.walletapp.wifip2p.wifi;
 
+import android.app.Dialog;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.sql.SQLiteHelper;
-import app.src.com.walletapp.utils.MyPreferences;
 import app.src.com.walletapp.wifip2p.ChangeDeviceImage;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
@@ -55,7 +57,6 @@ import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 public class DeviceListFragment extends ListFragment implements PeerListListener, ChangeDeviceImage {
 
     static List<WifiP2pDevice> peers = new ArrayList<>();
-    ProgressDialog progressDialog = null;
     View mContentView = null;
     private WifiP2pDevice device;
     static int[] drawable = {R.drawable.ic_steak, R.drawable.ic_hamburger};
@@ -64,6 +65,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     private LinearLayout peersLay;
     private ListView PeerList;
     ShowMyInformation mOwnInfoListener;
+    ProgressDialog pDial;
     private SQLiteHelper myDb;
 
     public DeviceListFragment() {
@@ -74,19 +76,26 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         super.onActivityCreated(savedInstanceState);
         wAdapter = new WiFiPeerListAdapter(getActivity(), R.layout.row_devices, peers, drawable);
         this.setListAdapter(wAdapter);
-        mOwnInfoListener=((WiFiDirectActivity)getActivity());
+        mOwnInfoListener = ((TransferActivity) getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContentView = inflater.inflate(R.layout.device_list, null);
-        peerList= mContentView.findViewById(R.id.peer_list_show);
-        PeerList= mContentView.findViewById(android.R.id.list);
-        peersLay= mContentView.findViewById(R.id.peers_lay);
+        peerList = mContentView.findViewById(R.id.peer_list_show);
+        PeerList = mContentView.findViewById(android.R.id.list);
+        peersLay = mContentView.findViewById(R.id.peers_lay);
+        pDial = new ProgressDialog(getActivity(),R.style.DialogTheme);
+        pDial.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        pDial.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        pDial.getWindow().setGravity(Gravity.CENTER_VERTICAL);
+
         return mContentView;
     }
 
-    /**2
+    /**
+     * 2
+     *
      * @return this device
      */
     public WifiP2pDevice getDevice() {
@@ -118,11 +127,11 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         mOwnInfoListener.myDetails(device);
     }
 
+
+
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peerList) {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
+       pDial.cancel();
         peers.clear();
         peers.addAll(peerList.getDeviceList());
         addDeviceDataToTable(peers);
@@ -130,14 +139,13 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         if (peers.size() == 0) {
             mOwnInfoListener.disConnectAll();
             Log.d(TAG, "No devices found");
+            timerDelayRemoveDialog(2000,pDial);
             return;
         }
-
-
         //TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-        if(GlobalActivity.getAddressScanned()!=null && !GlobalActivity.getAddressScanned().equalsIgnoreCase("")){
+        if (GlobalActivity.getAddressScanned() != null && !GlobalActivity.getAddressScanned().equalsIgnoreCase("")) {
             for (int i = 0; i < peers.size(); i++) {
-                if(peers.get(i).deviceAddress.equalsIgnoreCase(GlobalActivity.getAddressScanned())){
+                if (peers.get(i).deviceAddress.equalsIgnoreCase(GlobalActivity.getAddressScanned())) {
 //                    DeviceDetailFragment fragment=getActivity().getFragmentManager().findFragmentById(R.id.device_detail_container);
                 }
             }
@@ -147,7 +155,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
 
     private void addDeviceDataToTable(List<WifiP2pDevice> peers) {
         myDb = new SQLiteHelper(getActivity());
-        Log.i(TAG, "addDeviceDataToTable: "+myDb.insertPeerRecord(peers,SharedPreferencesHandler.getFloatValues(getActivity(),"balance"),getActivity()));
+        Log.i(TAG, "addDeviceDataToTable: " + myDb.insertPeerRecord(peers, SharedPreferencesHandler.getFloatValues(getActivity(), "balance"), getActivity()));
     }
 
     public void clearPeers() {
@@ -159,21 +167,24 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      *
      */
     public void onInitiateDiscovery() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
-        progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel", "finding nearby devices", true,
-                true, new DialogInterface.OnCancelListener() {
-
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-
-                    }
-                });
+        pDial.show();
+        timerDelayRemoveDialog(6000,pDial);
     }
 
     public static void refreshList(WifiP2pConfig config, int ic_steak, int position) {
 //        drawable[position] = ic_steak;
-        wAdapter.refresh(position,ic_steak);
+        wAdapter.refresh(position, ic_steak);
+    }
+
+
+    public void timerDelayRemoveDialog(int time, final ProgressDialog pDial) {
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                pDial.dismiss();
+                if (peers.size() == 0) {
+                    Toast.makeText(getActivity(), "No devices found...Please retry!!!", Toast.LENGTH_LONG).show();
+                }
+            }
+        }, time);
     }
 }

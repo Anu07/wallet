@@ -11,6 +11,10 @@ import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.view.BaseView;
 
@@ -29,9 +33,11 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         super.onStart();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         dialog = new Dialog(this, android.R.style.Theme_Translucent);
         View views = LayoutInflater.from(this).inflate(R.layout.dot_dialog, null);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -42,6 +48,12 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -63,4 +75,6 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         textView.setTextColor(getResources().getColor(R.color.colorPrimary));
         sBar.show();
     }
+
+
 }

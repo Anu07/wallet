@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -43,6 +44,7 @@ import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,6 +70,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.model.onlinepayment.OnlinePaymentRequest;
@@ -108,9 +112,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     private View mContentView = null;
     private WifiP2pDevice device;
     private WifiP2pInfo info;
-    ProgressDialog progressDialog = null;
     static float valueUpdated;
-    private static ProgressDialog mProgressDialog;
     public static String WiFiClientIp = "";
     static Boolean ClientCheck = false;
     public static String GroupOwnerAddress = "";
@@ -121,7 +123,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     private Uri MsgUri;
     private Button sendBttn;
     private EditText amtEntered;
-    ProgressDialog pDial;
+    ProgressDialog pDialog;
+    static ProgressDialog pDial=null;
     private float leftBalance;
     static Context ctx;
     private static LinearLayout creditsLay;
@@ -139,7 +142,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     private BroadcastReceiver updateUIReciver;
     private float amountSent=0;
     private int count;
-
 
     @Override
     public void onAttach(Context context) {
@@ -171,9 +173,16 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         connectDiscnnct = mContentView.findViewById(R.id.cnnctDiscnnctLayout);
         sendCreditsBttn = mContentView.findViewById(R.id.sendMoney);
         mdeductionMsg = mContentView.findViewById(R.id.device_address);
-        pDial = new ProgressDialog(getActivity());
-        pDial.setMessage("Sending...");
-        mContentView.findViewById(R.id.btn_connect).setOnClickListener(new View.OnClickListener() {
+        pDialog = new ProgressDialog(getActivity(), R.style.DialogTheme);
+        pDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+        pDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        pDialog.getWindow().setGravity(Gravity.CENTER);
+        pDialog.setMessage("Sending...");
+
+        //restricting user to not enter more than 2 decimal places
+//      amtEntered.addTextChangedListener(new DecimalFilter(amtEntered,getActivity()));
+        unbinder = ButterKnife.bind(this, mContentView);
+        btnConnect.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -181,17 +190,16 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 if (config != null && config.deviceAddress != null && device != null) {
                     config.deviceAddress = device.deviceAddress;
                     config.wps.setup = WpsInfo.PBC;
-                    if (progressDialog != null && progressDialog.isShowing()) {
-                        progressDialog.dismiss();
-                    }
-                    progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
-                            "Connecting to :" + device.deviceAddress, true, true
-                    );
+                    btnConnect.setEnabled(false);
 
+                    btnConnect.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnConnect.setEnabled(true);
+                        }
+                    }, 5000);
                     //send dynamic image
                     ((DeviceActionListener) getActivity()).connect(config, position);
-                } else {
-
                 }
             }
         });
@@ -202,13 +210,13 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     @Override
                     public void onClick(View v) {
                         ((DeviceActionListener) getActivity()).disconnect();
-                        if (((WiFiDirectActivity) getActivity()).failedERROR) {
-                            if (progressDialog != null && progressDialog.isShowing()) {
-                                progressDialog.dismiss();
+                        if (((TransferActivity) getActivity()).failedERROR) {
+                            if (pDialog != null && pDialog.isShowing()) {
+                                pDialog.dismiss();
                             }
                         }
-                        if (progressDialog != null && progressDialog.isShowing()) {
-                            progressDialog.dismiss();
+                        if (pDialog != null && pDialog.isShowing()) {
+                            pDialog.dismiss();
                         }
                     }
                 });
@@ -224,9 +232,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             }
         });
 
-        //restricting user to not enter more than 2 decimal places
-      amtEntered.addTextChangedListener(new DecimalFilter(amtEntered,getActivity()));
-        unbinder = ButterKnife.bind(this, mContentView);
+
         return mContentView;
     }
 
@@ -236,10 +242,12 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
      */
 
     private void sendCredits() {
+        pDial = new ProgressDialog(getActivity());
+        pDial.setMessage("Sending...");
         if (!amtEntered.getText().toString().equalsIgnoreCase("") && Float.parseFloat(amtEntered.getText().toString()) < SharedPreferencesHandler.getFloatValues(getActivity(), "balance") && Float.parseFloat(amtEntered.getText().toString()) > 0 &&Float.parseFloat(amtEntered.getText().toString()) != 0) {
             pDial.show();
             TxnId = Utils.getTransactionId();
-            ((WiFiDirectActivity)getActivity()).mHelper.saveTxnDetails(TxnId,amtEntered.getText().toString(),device.deviceAddress,getActivity());
+            ((TransferActivity)getActivity()).mHelper.saveTxnDetails(TxnId,amtEntered.getText().toString(),device.deviceAddress,getActivity());
             sendTextMsg("Transaction Id:" + TxnId + "," + "" + "," + amtEntered.getText().toString());
         } else {
             Utils.showSnackBar(getView(), "Invalid amount");
@@ -249,8 +257,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
     @Override
     public void onConnectionInfoAvailable(final WifiP2pInfo info) {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
+        if (pDial != null && pDial.isShowing()) {
+            pDial.dismiss();
         }
         this.info = info;
         this.getView().setVisibility(View.VISIBLE);
@@ -263,6 +271,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             creditsLay.setVisibility(View.GONE);
             sendBttn.setVisibility(View.GONE);
             btnConnect.setVisibility(View.GONE);
+            btnDisconnect.setVisibility(View.GONE);
         }
         // The owner IP is now known.
         TextView view = mContentView.findViewById(R.id.group_owner);
@@ -370,7 +379,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         view = mContentView.findViewById(R.id.device_info);
         view.setText(device.toString());
         Log.i(TAG, "showDetails: "+GlobalActivity.userType);
-        if(GlobalActivity.userType.equalsIgnoreCase("S")){
+        if(GlobalActivity.userType.equalsIgnoreCase("S") && device.status==3){          //3 means available
             connectDiscnnct.setVisibility(View.VISIBLE);
             creditsLay.setVisibility(View.GONE);
         }else{
@@ -396,15 +405,10 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         if (config != null && config.deviceAddress != null && device != null) {
             config.deviceAddress = device.deviceAddress;
             config.wps.setup = WpsInfo.PBC;
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
+            if (pDialog != null && pDialog.isShowing()) {
+                pDialog.dismiss();
             }
-            progressDialog = ProgressDialog.show(getActivity(), "Press back to cancel",
-                    "Connecting to :" + device.deviceAddress, true, true
-            );
-
-            //send dynamic image
-            ((DeviceActionListener) getActivity()).connect(config, position);
+            pDialog.show();            //send dynamic image
         } else {
 
         }
@@ -538,6 +542,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         Intent intent = new Intent();           //Custom intent to send text file to receiver
         intent.setData(MsgUri);
         filePicker.submit(intent, "", Utils.getTransactionId());
+        pDial.dismiss();
         updateValuesafterCreditsSent();
     }
 
@@ -548,7 +553,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             amountSent=Float.parseFloat(amtEntered.getText().toString());
             Log.i(TAG, "updateValuesafterCreditsSent: amount"+amountSent);
             SharedPreferencesHandler.setFloatValues(getActivity(), "balance", leftBalance);
-            pDial.dismiss();
             mListener.walletBalanceUpdate(SharedPreferencesHandler.getFloatValues(getActivity(), "balance"));
             Log.i(TAG, "updateValuesafterCreditsSent: " + SharedPreferencesHandler.getFloatValues(getActivity(), "balance"));
             amtEntered.setText("");
@@ -566,7 +570,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
     @Override
     public void onError(String message) {
-
+        Log.i(TAG, "onError:Some ERRROR OCCURRED ");
     }
 
     @Override
@@ -595,8 +599,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             mActivity = ctx;
             handler = new Handler();
             this.PORT = port;
-        /*if (mProgressDialog == null)
-            mProgressDialog = new ProgressDialog(mFilecontext,
+        /*if (pDial == null)
+            pDial = new ProgressDialog(mFilecontext,
                     ProgressDialog.THEME_HOLO_LIGHT);*/
         }
 
@@ -653,14 +657,14 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
                         public void run() {
                             // TODO Auto-generated method stub
-                            mProgressDialog.setMessage("Receiving...");
-                            mProgressDialog.setIndeterminate(false);
-                            mProgressDialog.setMax(100);
-                            mProgressDialog.setProgress(0);
-                            mProgressDialog.setProgressNumberFormat(null);
-                            mProgressDialog
+                            pDial.setMessage("Receiving...");
+                            pDial.setIndeterminate(false);
+                            pDial.setMax(100);
+                            pDial.setProgress(0);
+                            pDial.setProgressNumberFormat(null);
+                            pDial
                                     .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                            mProgressDialog.show();
+                            pDial.show();
                         }
                     };
                     handler.post(r);*/
@@ -708,6 +712,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
                 return "";
             } catch (IOException e) {
+                if(e.equals("ADDRINUSE")){
+                }
                 Log.e(WiFiDirectActivity.TAG, e.getMessage());
                 return null;
             }
@@ -722,7 +728,6 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             if (result != null) {
                 Log.i(TAG, "onPostExecute: after transfer"+result);
                 if (!result.equalsIgnoreCase("Demo")) {
-
                     openFile(mActivity, result, mFilecontext);
                     //TODO Update balance in main Activity
                 } else if (!TextUtils.isEmpty(result)) {
@@ -749,8 +754,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
          */
         @Override
         protected void onPreExecute() {
-       /* if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(mFilecontext);
+       /* if (pDial == null) {
+            pDial = new ProgressDialog(mFilecontext);
         }*/
         }
     }
@@ -766,6 +771,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         Payment payment = new Payment(String.valueOf(valueUpdated), "$", "Cash received", getMacAddress(activity), getUniqueDeviceId(), "", Calendar.getInstance().getTime().toString(), txnId, senderId);
         bal = SharedPreferencesHandler.getFloatValues(activity, "balance") + valueUpdated;
         Log.i(TAG, "balance after recieving: " + bal);
+        SharedPreferencesHandler.setFloatValues(activity,"balance",bal);
         showRecieveAlert(activity, valueUpdated, payment);
     }
 
@@ -822,7 +828,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     if (ActualFilelength > 0) {
                         Percentage = (int) ((total * 100) / ActualFilelength);
                     }
-                    mProgressDialog.setProgress(Percentage);
+                    pDial.setProgress(Percentage);
                 } catch (Exception e) {
                     // TODO: handle exception
                     e.printStackTrace();
@@ -830,9 +836,9 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     ActualFilelength = 0;
                 }
             }
-            if (mProgressDialog != null) {
-                if (mProgressDialog.isShowing()) {
-                    mProgressDialog.dismiss();
+            if (pDial != null) {
+                if (pDial.isShowing()) {
+                    pDial.dismiss();
                 }
             }
 
@@ -868,21 +874,21 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                     if (length > 0) {
                         progresspercentage = (int) ((total * 100) / length);
                     }
-//                    mProgressDialog.setProgress(progresspercentage);
+//                    pDial.setProgress(progresspercentage);
                 } catch (Exception e) {
                     // TODO: handle exception
                     e.printStackTrace();
-                    if (mProgressDialog != null) {
-                        if (mProgressDialog.isShowing()) {
-                            mProgressDialog.dismiss();
+                    if (pDial != null) {
+                        if (pDial.isShowing()) {
+                            pDial.dismiss();
                         }
                     }
                 }
             }
             // dismiss progress after sending
-            if (mProgressDialog != null) {
-                if (mProgressDialog.isShowing()) {
-                    mProgressDialog.dismiss();
+            if (pDial != null) {
+                if (pDial.isShowing()) {
+                    pDial.dismiss();
                 }
             }
             out.close();
@@ -895,25 +901,27 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     }
 
     public void showprogress(final String task) {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity(),
-                    ProgressDialog.THEME_HOLO_LIGHT);
+        if (pDial == null) {
+            pDial = new ProgressDialog(getActivity(),
+                    R.style.DialogTheme);
         }
         Handler handle = new Handler();
         final Runnable send = new Runnable() {
 
             public void run() {
                 // TODO Auto-generated method stub
-                mProgressDialog.setMessage(task);
-                // mProgressDialog.setProgressNumberFormat(null);
-                // mProgressDialog.setProgressPercentFormat(null);
-                mProgressDialog.setIndeterminate(false);
-                mProgressDialog.setMax(100);
-//				mProgressDialog.setCancelable(false);
-                mProgressDialog.setProgressNumberFormat(null);
-                mProgressDialog
-                        .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                mProgressDialog.show();
+                if(pDial!=null){
+                    pDial.setMessage(task);
+                    // pDial.setProgressNumberFormat(null);
+                    // pDial.setProgressPercentFormat(null);
+                    pDial.setIndeterminate(false);
+                    pDial.setMax(100);
+//				pDial.setCancelable(false);
+                    pDial.setProgressNumberFormat(null);
+                    pDial
+                            .setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    pDial.show();
+                }
             }
         };
         handle.post(send);
@@ -921,8 +929,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
     public static void DismissProgressDialog() {
         try {
-            if (mProgressDialog != null && mProgressDialog.isShowing()) {
-                    mProgressDialog.dismiss();
+            if (pDial != null && pDial.isShowing()) {
+                    pDial.dismiss();
             }
         } catch (Exception e) {
             // TODO: handle exception

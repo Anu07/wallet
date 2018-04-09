@@ -9,8 +9,12 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/barcode-reader" />
+            <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/multipicker" />
+            <option value="$PROJECT_DIR$/zbar" />
+            <option value="$PROJECT_DIR$/zbar-sample" />
+            <option value="$PROJECT_DIR$/zxing" />
+            <option value="$PROJECT_DIR$/zxing-sample" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

@@ -25,11 +25,7 @@ public class BaseFragment extends Fragment implements BaseView {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dialog = new Dialog(getActivity(), android.R.style.Theme_Translucent);
-        View views = LayoutInflater.from(getActivity()).inflate(R.layout.dot_dialog, null);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        dialog.setContentView(views);
+
     }
 
     @Nullable
@@ -38,8 +34,14 @@ public class BaseFragment extends Fragment implements BaseView {
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
+
     @Override
     public void showProgress() {
+        dialog = new Dialog(getContext(), android.R.style.Theme_Translucent);
+        View views = LayoutInflater.from(getContext()).inflate(R.layout.dot_dialog, null);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(views);
         dialog.show();
     }
 

@@ -180,7 +180,8 @@
                         class="app.src.com.walletapp.wifip2p.wifi.DeviceDetailFragment"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/margin_8">
+                        android:layout_marginTop="@dimen/margin_8"
+                        android:layout_marginBottom="25dp">
                         <!-- Preview: layout=@layout/device_detail -->
                     </fragment>
                 </LinearLayout>

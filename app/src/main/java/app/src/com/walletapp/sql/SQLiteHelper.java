@@ -15,7 +15,8 @@ import java.util.List;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
+import static app.src.com.walletapp.wifip2p.wifi.TransferActivity.TAG;
+
 
 /**
  * Created by SONY on 3/7/2018.
@@ -50,7 +51,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL("create table " + TBL_USERDATA +" ( " + KEY_INDEX + " VARCHAR PRIMARY KEY                          \n" +
+        sqLiteDatabase.execSQL("create table " + TBL_USERDATA +" ( " + KEY_INDEX + " INTEGER PRIMARY KEY                          \n" +
                 "   AUTOINCREMENT," + KEY_DEVICE_ID + " VARCHAR," + KEY_USERPHONE + " VARCHAR, " + KEY_PHONESTATUS + " VARCHAR, " + KEY_TYPE + " VARCHAR);");
         sqLiteDatabase.execSQL("create table " + TBL_USERTXN + " ( " + KEY_TXN_ID + " VARCHAR PRIMARY KEY ," + KEY_RECEIVER_USERPHONE + " VARCHAR, " + KEY_AMT_SENT + " VARCHAR, " + KEY_RECEIVER_DEVICE_ID + " VARCHAR, " + KEY_SENDER_DEVICE_ID + " VARCHAR, " + KEY_BAL_LEFT + " VARCHAR);");
     }
@@ -104,7 +105,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 contentValues.put(KEY_SENDER_DEVICE_ID, deviceAddress);
                 contentValues.put(KEY_RECEIVER_DEVICE_ID, SharedPreferencesHandler.getStringValues(context,"ownAddress"));
             }
-
             contentValues.put(KEY_AMT_SENT, amtEntered);
             contentValues.put(KEY_BAL_LEFT, SharedPreferencesHandler.getFloatValues(context,"balance"));
             database.insert(TBL_USERTXN, null, contentValues);

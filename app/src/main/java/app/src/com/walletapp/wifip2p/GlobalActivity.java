@@ -20,6 +20,8 @@ import android.support.multidex.MultiDexApplication;
 
 import com.crashlytics.android.Crashlytics;
 
+import org.greenrobot.eventbus.EventBus;
+
 import io.fabric.sdk.android.Fabric;
 
 
@@ -76,5 +78,6 @@ public class GlobalActivity extends MultiDexApplication {
     public static void setAddressScanned(String addressScanned) {
         GlobalActivity.addressScanned = addressScanned;
     }
+
 
 }

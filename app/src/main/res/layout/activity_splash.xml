@@ -3,21 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@drawable/splash_background"
     android:padding="@dimen/s_padding"
     tools:context=".view.activity.SplashActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:background="@drawable/border_bacground">
+        android:gravity="center">
 
+       <!-- <TextView android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="sans-serif"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:text="WalletApp" />-->
         <ImageView
             android:id="@+id/app_logo"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:src="@mipmap/ic_launcher"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/splashlogo"/>
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>
