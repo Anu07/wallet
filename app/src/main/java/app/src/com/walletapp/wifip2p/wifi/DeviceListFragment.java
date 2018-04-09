@@ -46,6 +46,7 @@ import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
+import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 
 import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
@@ -67,6 +68,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
     ShowMyInformation mOwnInfoListener;
     ProgressDialog pDial;
     private SQLiteHelper myDb;
+    PulsatorLayout pulsator;
 
     public DeviceListFragment() {
     }
@@ -85,11 +87,12 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         peerList = mContentView.findViewById(R.id.peer_list_show);
         PeerList = mContentView.findViewById(android.R.id.list);
         peersLay = mContentView.findViewById(R.id.peers_lay);
+        pulsator=  mContentView.findViewById(R.id.pulsator);
         pDial = new ProgressDialog(getActivity(),R.style.DialogTheme);
         pDial.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         pDial.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
         pDial.getWindow().setGravity(Gravity.CENTER_VERTICAL);
-
+        pulsator.start();
         return mContentView;
     }
 
@@ -167,7 +170,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
      *
      */
     public void onInitiateDiscovery() {
-        pDial.show();
+//        pDial.show();
         timerDelayRemoveDialog(6000,pDial);
     }
 

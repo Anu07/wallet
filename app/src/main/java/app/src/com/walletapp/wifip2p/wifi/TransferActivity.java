@@ -136,7 +136,7 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.transfer_activity);
+        setContentView(R.layout.transfer_activity_pulsator);
         ButterKnife.bind(this);
         initViews();
         mHelper = new SQLiteHelper(this);

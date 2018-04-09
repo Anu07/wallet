@@ -63,6 +63,6 @@ dependencies {
     implementation files('libs/java-json.jar')
     compile 'org.greenrobot:eventbus:3.1.1'
     compile 'me.dm7.barcodescanner:zbar:1.9.8'
-
+    compile 'pl.bclogic:pulsator4droid:1.0.3'
 }
 apply plugin: 'com.google.gms.google-services'
