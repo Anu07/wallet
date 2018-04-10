@@ -18,5 +18,5 @@
     <dimen name="mediumText">20sp</dimen>
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
-    <dimen name="xxl_margin" >50dp</dimen>
+    <dimen name="xxl_margin">50dp</dimen>
 </resources>

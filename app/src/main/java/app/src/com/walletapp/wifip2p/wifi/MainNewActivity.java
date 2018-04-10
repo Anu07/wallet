@@ -1,8 +1,6 @@
 package app.src.com.walletapp.wifip2p.wifi;
 
-import android.content.Context;
 import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,7 +8,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,11 +16,12 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.utils.CommonUtils;
 import app.src.com.walletapp.view.activity.BaseActivity;
-import app.src.com.walletapp.wifip2p.GlobalActivity;
 import app.src.com.walletapp.wifip2p.utils.PermissionsAndroid;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ViewPagerAdapter;
@@ -47,13 +45,13 @@ public class MainNewActivity extends BaseActivity{
     TabLayout tab;
     @BindView(R.id.viewPager)
     ViewPager viewPager;
-    private int[] tabIcons = {R.drawable.home, R.drawable.history, R.drawable.profile, R.drawable.setting};
+    private int[] tabIcons = {R.drawable.home, R.drawable.history, R.drawable.setting, R.drawable.profile};
     private final IntentFilter intentFilter = new IntentFilter();
     private WifiP2pManager.Channel channel;
     private WifiP2pManager manager;
     private boolean doubleBackToExitPressedOnce=false;
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +68,12 @@ public class MainNewActivity extends BaseActivity{
             GlobalActivity.userType="S";
             scanDevicesNearby();
         }*/
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onOfflineEvent(OfflineEvent event) {
+        Log.i(TAG, "onOfflineEvent: ");
     }
 
     private void initFirebase() {
@@ -99,8 +103,8 @@ public class MainNewActivity extends BaseActivity{
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new HomeFragment(), "Home");
         adapter.addFragment(new ProgressFragment(), "History");
-        adapter.addFragment(new ProgressFragment(), "Profile");
         adapter.addFragment(new ProgressFragment(), "Settings");
+        adapter.addFragment(new ProfileFragment(), "Profile");
         viewPager.setAdapter(adapter);
     }
 

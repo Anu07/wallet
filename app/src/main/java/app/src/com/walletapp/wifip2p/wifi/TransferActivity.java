@@ -59,6 +59,7 @@ import com.google.firebase.crash.FirebaseCrash;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -83,6 +84,7 @@ import butterknife.OnClick;
 import io.fabric.sdk.android.Fabric;
 
 import static app.src.com.walletapp.sql.SQLiteHelper.*;
+import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 
 /**
@@ -132,7 +134,7 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
     }
 
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,6 +162,12 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
         mHelper = new SQLiteHelper(this);
 //        mHelper.getAllDevices();
 
+    }
+
+
+    @Subscribe
+    public void onOfflineEvent(OfflineEvent event) {
+        Log.i(TAG, "onOfflineEvent: ");
     }
 
     /*

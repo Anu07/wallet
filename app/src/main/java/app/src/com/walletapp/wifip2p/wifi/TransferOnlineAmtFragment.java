@@ -6,24 +6,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.view.fragment.BaseFragment;
 
 /**
- * Created by SONY on 4/5/2018.
+ * Created by SONY on 4/10/2018.
  */
 
-public class ProgressFragment extends BaseFragment {
+public class TransferOnlineAmtFragment extends BaseFragment {
 
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v=inflater.inflate(R.layout.progress_layout,container,false);
-        return v;
+        View view = inflater.inflate(R.layout.content_transfer_amt_online, container
+                , false);
+        return view;
     }
 }

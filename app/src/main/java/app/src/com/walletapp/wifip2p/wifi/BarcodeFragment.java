@@ -24,6 +24,9 @@ import com.google.zxing.Result;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +66,7 @@ public class BarcodeFragment extends BaseFragment implements
     public BarcodeFragment() {
         // Required empty public constructor
     }
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle state) {

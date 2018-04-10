@@ -13,6 +13,8 @@ import android.util.Patterns;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 import org.json.XML;
 
@@ -23,10 +25,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 /**
  * Created by SONY on 3/22/2018.
@@ -52,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
     String PARAMETER_EMAIL = "email";
     String PARAMETER_PWD = "password";
     String PARAMETER_DID = "device_id";
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +71,10 @@ public class RegisterActivity extends AppCompatActivity {
             new LoginAsync().execute();
         }
     }
-
+    @Subscribe
+    public void onOfflineEvent(OfflineEvent event) {
+        Log.i(TAG, "onOfflineEvent: ");
+    }
     private boolean validate() {
         if(fullname.getText().toString().isEmpty()){
             Toast.makeText(this,"Fullname can't be left empty.",Toast.LENGTH_LONG).show();

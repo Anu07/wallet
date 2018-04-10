@@ -9,12 +9,12 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,13 +22,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import app.src.com.walletapp.R;
 import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.sql.SQLiteHelper;
 import app.src.com.walletapp.utils.WalletBalanceListener;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
-import app.src.com.walletapp.wifip2p.WiFiPeerListAdapter;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
 import app.src.com.walletapp.wifip2p.utils.Utils;
@@ -37,7 +38,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-import static android.os.Looper.getMainLooper;
 import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 /**
@@ -63,6 +63,10 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
     RelativeLayout deviceListLayout;
     @BindView(R.id.homeLayout)
     LinearLayout homeLayout;
+    @BindView(R.id.optionsLayout)
+    LinearLayout optionsLayout;
+    @BindView(R.id.tab_container)
+    LinearLayout tabContainer;
     private SQLiteHelper mHelper;
     private final IntentFilter intentFilter = new IntentFilter();
     private WifiP2pManager.Channel channel;
@@ -72,11 +76,11 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
     private WifiP2pDevice mDevice;
     private float mAmtUpdated;
 
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container,false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
         unbinder = ButterKnife.bind(this, view);
         initSqlite();
         setWalletBalance();
@@ -96,7 +100,7 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
         }
 
         if (!walletBalance.getText().toString().equalsIgnoreCase("NA")) {
-            wallet_curr = Float.parseFloat(walletBalance.getText().toString().replace("$",""));
+            wallet_curr = Float.parseFloat(walletBalance.getText().toString().replace("$", ""));
         }
         if (getActivity().getIntent().hasExtra("balance")) {
             float newBal = wallet_curr + getActivity().getIntent().getIntExtra("balance", 0);
@@ -127,19 +131,24 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.onlineView:
+                optionsLayout.setVisibility(View.GONE);
+                getActivity().getSupportFragmentManager().beginTransaction().add(R.id.tab_container, new TransferOnlineFragment(), "online").addToBackStack("online").commit();
                 break;
             case R.id.offlineView:
+                optionsLayout.setVisibility(View.VISIBLE);
                 GlobalActivity.userType = "S";            //set user type to sender
-                EventBus.getDefault().postSticky(new OfflineEvent("1","0"));
-                startActivity(new Intent(getActivity(),TransferActivity.class));
+                EventBus.getDefault().postSticky(new OfflineEvent("1", "0"));
+                startActivity(new Intent(getActivity(), TransferActivity.class));
                 break;
             case R.id.qrView:
-                startActivity(new Intent(getActivity(),BarCodeScanActivity.class));
+                optionsLayout.setVisibility(View.VISIBLE);
+                startActivity(new Intent(getActivity(), BarCodeScanActivity.class));
                 break;
             case R.id.recieveView:
+                optionsLayout.setVisibility(View.VISIBLE);
                 GlobalActivity.userType = "R";            //setting usertype to reciever
-                EventBus.getDefault().postSticky(new OfflineEvent("0","1"));
-                startActivity(new Intent(getActivity(),TransferActivity.class));
+                EventBus.getDefault().postSticky(new OfflineEvent("0", "1"));
+                startActivity(new Intent(getActivity(), TransferActivity.class));
                 break;
         }
     }
@@ -149,14 +158,14 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
      */
     private void scanDevicesNearby() {
 
-        startActivity(new Intent(getActivity(),TransferActivity.class));
+        startActivity(new Intent(getActivity(), TransferActivity.class));
     }
 
 
     @Override
     public void myDetails(WifiP2pDevice device) {
-        SharedPreferencesHandler.setStringValues(getActivity(),"ownAddress",device.deviceAddress);
-        mDevice=device;
+        SharedPreferencesHandler.setStringValues(getActivity(), "ownAddress", device.deviceAddress);
+        mDevice = device;
     }
 
     @Override
@@ -179,7 +188,7 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
          * request
          */
         if (manager != null) {
-            final DeviceListFragment fragment = (DeviceListFragment)getActivity().getFragmentManager().findFragmentById(R.id.frag_list);
+            final DeviceListFragment fragment = (DeviceListFragment) getActivity().getFragmentManager().findFragmentById(R.id.frag_list);
             if (fragment.getDevice() == null
                     || fragment.getDevice().status == WifiP2pDevice.CONNECTED) {
                 disconnect();

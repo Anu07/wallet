@@ -36,6 +36,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +83,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         this.setListAdapter(wAdapter);
         mOwnInfoListener = ((TransferActivity) getActivity());
     }
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mContentView = inflater.inflate(R.layout.device_list, null);

@@ -543,5 +543,9 @@
     <string name="scan_qr_code">Scan QR code</string>
     <string name="my_qr_code">My QR code</string>
     <string name="register"><u>Create an Account</u></string>
+    <string name="title_activity_transfer_online">TransferOnlineActivity</string>
+    <string name="continue_bttn">Continue</string>
+    <string name="enter_amt_hint">Enter amount</string>
+    <string name="enter_mrchnt_id">Enter MerchantId</string>
 
 </resources>

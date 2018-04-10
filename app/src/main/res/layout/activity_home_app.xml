@@ -33,8 +33,9 @@
         android:layout_height="?actionBarSize"
         android:layout_alignParentBottom="true"
         app:tabGravity="fill"
+        android:background="@color/colorPrimary"
         app:tabMode="fixed"
-        app:tabSelectedTextColor="@color/colorPrimary" />
+        app:tabSelectedTextColor="@color/white" />
 
 
 </RelativeLayout>

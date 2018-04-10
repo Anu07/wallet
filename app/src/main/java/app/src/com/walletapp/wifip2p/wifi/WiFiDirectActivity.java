@@ -54,11 +54,14 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.crash.FirebaseCrash;
 
+import org.greenrobot.eventbus.Subscribe;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.presenter.LoginPresenter;
 import app.src.com.walletapp.sql.SQLiteHelper;
 import app.src.com.walletapp.utils.CommonUtils;
@@ -157,6 +160,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         }
     }
 
+
+    @Subscribe
+    public void onOfflineEvent(OfflineEvent event) {
+        Log.i(TAG, "onOfflineEvent: ");
+    }
 
     private void setNavigationView() {
         Toolbar toolbar = findViewById(R.id.toolbar);

@@ -16,7 +16,10 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.view.BaseView;
+
+import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 
 /**
@@ -43,6 +46,11 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
         dialog.setContentView(views);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onOfflineEvent(OfflineEvent event) {
+        Log.i(TAG, "onOfflineEvent: ");
     }
 
     @Override

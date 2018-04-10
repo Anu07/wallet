@@ -58,6 +58,9 @@ import com.kbeanie.multipicker.api.FilePicker;
 import com.kbeanie.multipicker.api.callbacks.FilePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenFile;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -162,7 +165,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             }
         }
     }
-
+    @Subscribe(threadMode = ThreadMode.MAIN)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="app.src.com.walletapp.TransferOnlineActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:popupTheme="@style/AppTheme.PopupOverlay" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:id="@+id/balanceLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/xxl_margin"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/wallet_balance_msg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/s_margin"
+                    android:layout_marginTop="@dimen/s_margin"
+                    android:gravity="center_horizontal"
+                    android:text="@string/your_wallet_balance" />
+
+                <TextView
+                    android:id="@+id/wallet_balance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/s_margin"
+                    android:layout_marginTop="@dimen/s_margin"
+                    android:gravity="center_horizontal"
+                    android:text="NA"
+                    android:textSize="21dp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="@dimen/m_margin"
+                    android:layout_marginRight="@dimen/m_margin"
+                    android:background="@color/colorPrimary" />
+            </LinearLayout>
+
+            <include layout="@layout/content_transfer_online"
+                android:layout_below="@+id/balanceLayout"
+                android:layout_height="400dp"
+                android:layout_width="match_parent" />
+        </LinearLayout>
+    </ScrollView>
+
+
+</RelativeLayout>
