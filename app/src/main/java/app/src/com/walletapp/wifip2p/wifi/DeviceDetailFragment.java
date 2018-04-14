@@ -804,7 +804,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     private static OnlinePaymentRequest syncReceiveRequest(Payment payment) {
         List<Payment> payments = new ArrayList<>();
         payments.add(payment);
-        OnlinePaymentRequest receiveRequest = new OnlinePaymentRequest(ONLINE, payments, MyPreferences.getInstance().getPreference(MyPreferences.Keys.TOKEN), MyPreferences.getInstance().getPreference(MyPreferences.Keys.USERID));
+        OnlinePaymentRequest receiveRequest = new OnlinePaymentRequest(ONLINE, payments, MyPreferences.getInstance(GlobalActivity.getGlobalContext()).getPlaceObj(MyPreferences.Keys.TOKEN), MyPreferences.getInstance(GlobalActivity.getGlobalContext()).getPlaceObj(MyPreferences.Keys.USERID));
         return receiveRequest;
     }
 

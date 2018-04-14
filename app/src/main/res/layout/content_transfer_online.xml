@@ -23,6 +23,7 @@
                 android:orientation="vertical">
 
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/mrchntInput"
                     android:layout_width="match_parent"
                     android:layout_height="?actionBarSize"
                     android:layout_marginLeft="@dimen/xl_margin"
@@ -30,10 +31,32 @@
                     android:layout_marginRight="@dimen/xl_margin">
 
                     <android.support.design.widget.TextInputEditText
-                        android:id="@+id/amount_ed"
+                        android:id="@+id/mrchnt_ed"
                         android:hint="@string/enter_mrchnt_id"
                         android:layout_width="match_parent"
                         android:textColor="@color/white"
+                        android:maxLength="20"
+                        android:singleLine="true"
+                        android:layout_height="match_parent" />
+                </android.support.design.widget.TextInputLayout>
+
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/amountInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="?actionBarSize"
+                    android:layout_marginLeft="@dimen/xl_margin"
+                    android:textColorHint="@color/white"
+                    android:visibility="gone"
+                    android:layout_marginRight="@dimen/xl_margin">
+
+                    <android.support.design.widget.TextInputEditText
+                        android:id="@+id/amount_ed"
+                        android:hint="@string/enter_amt_hint"
+                        android:maxLength="10"
+                        android:singleLine="true"
+                        android:textColor="@color/white"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent" />
                 </android.support.design.widget.TextInputLayout>
 

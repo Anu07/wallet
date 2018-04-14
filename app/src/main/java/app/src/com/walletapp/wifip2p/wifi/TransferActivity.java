@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Random;
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.model.MyDeviceEvent;
 import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.presenter.LoginPresenter;
 import app.src.com.walletapp.sql.SQLiteHelper;
@@ -491,6 +492,7 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
         img.setImageResource(R.drawable.ic_hamburger);
         SharedPreferencesHandler.setStringValues(TransferActivity.this,"ownAddress",device.deviceAddress);
         mDevice=device;
+        EventBus.getDefault().postSticky(new MyDeviceEvent(mDevice));
     }
 
     @Override

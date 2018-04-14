@@ -46,6 +46,9 @@
             android:name=".wifip2p.wifi.BarCodeScanActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".wifip2p.wifi.QRCodeActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".wifip2p.wifi.TransferActivity"
             android:screenOrientation="portrait">
             <intent-filter>

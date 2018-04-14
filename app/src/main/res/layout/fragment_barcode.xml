@@ -1,29 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/white"
-    android:layout_height="match_parent">
-
-    <RelativeLayout android:id="@+id/scanLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <!-- Barcode Reader fragment -->
-        <fragment android:name="me.dm7.barcodescanner.zbar.sample.FullScannerFragment"
-            android:id="@+id/scanner_fragment"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </RelativeLayout>
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <ImageView
         android:id="@+id/scan_code_own"
         android:layout_width="match_parent"
-        android:visibility="gone"
         android:layout_height="match_parent" />
 
 </RelativeLayout>

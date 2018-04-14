@@ -78,10 +78,10 @@ public class CommonUtils {
         Currency currency = Currency.getInstance(locale);
         System.out.println("Currency Code: " + currency.getCurrencyCode());
         System.out.println("Symbol: " + currency.getSymbol());
-        MyPreferences.getInstance().Initialize(ctt);
-        MyPreferences.getInstance().writePreference(MyPreferences.Keys.Country, locale.getDisplayName());
-        MyPreferences.getInstance().writePreference(MyPreferences.Keys.Language, locale.getDisplayLanguage());
-        MyPreferences.getInstance().writePreference(MyPreferences.Keys.Currency, currency.getCurrencyCode());
+        MyPreferences.getInstance(ctt);
+        MyPreferences.getInstance(ctt).savePlaceObj(MyPreferences.Keys.Country, locale.getDisplayName());
+        MyPreferences.getInstance(ctt).savePlaceObj(MyPreferences.Keys.Language, locale.getDisplayLanguage());
+        MyPreferences.getInstance(ctt).savePlaceObj(MyPreferences.Keys.Currency, currency.getCurrencyCode());
         Log.i(TAG, "displayCurrencyInfoForLocale:Language " + locale.getDisplayLanguage());
     }
 
@@ -143,7 +143,7 @@ public class CommonUtils {
         builder = new AlertDialog.Builder(ctx);
         builder.setTitle(ctx.getString(R.string.logout)).setMessage("Are you sure you want to logout?").setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                MyPreferences.getInstance().writePreference(MyPreferences.Keys.USERID, "");
+                MyPreferences.getInstance(ctx).savePlaceObj(MyPreferences.Keys.USERID, "");
                 Intent intent = new Intent(GlobalActivity.getGlobalContext(), SplashActivity.class);
                 ctx.startActivity(intent);
                 ctx.finish();

@@ -1,7 +1,9 @@
 package app.src.com.walletapp.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 
 /**
@@ -9,40 +11,43 @@ import android.preference.PreferenceManager;
  */
 
 public class MyPreferences {
-    private static MyPreferences mInstance;
-    private Context mContext;
-    public static String LOGINSTATUS="loginStatus";
-    //
-    private SharedPreferences mMyPreferences;
+    private static MyPreferences sharePref = new MyPreferences();
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences.Editor editor;
 
-    private MyPreferences(){ }
+    private MyPreferences() {
+    } //prevent creating multiple instances by making the constructor private
 
-    public enum Keys{
-        USERID,LOGINSTATUS, Country, Language, Currency, DeviceToken, PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, QrImage, LOGINRESPONSE
+    public enum Keys {
+        USERID, DEVICEQR, LOGINSTATUS, Country, Language, Currency, DeviceToken, PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, QrImage, LOGINRESPONSE;
     }
 
-    public static MyPreferences getInstance(){
-        if (mInstance == null) mInstance = new MyPreferences();
-        return mInstance;
+    //The context passed into the getInstance should be application level context.
+    public static MyPreferences getInstance(Context context) {
+        if (sharedPreferences == null) {
+            sharedPreferences = context.getSharedPreferences(context.getPackageName(), Activity.MODE_PRIVATE);
+            editor = sharedPreferences.edit();
+        }
+        return sharePref;
     }
 
-    public void Initialize(Context ctxt){
-        mContext = ctxt;
-        //
-        mMyPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+    public void savePlaceObj(Keys key,String str) {
+        editor.putString(key.name(), str);
+        editor.commit();
     }
 
-    // Within Singleton class
-
-    public void writePreference(Keys key, String value){
-        SharedPreferences.Editor e = mMyPreferences.edit();
-        e.putString(key.name(), value);
-        e.commit();
+    public String getPlaceObj(Keys key) {
+        return sharedPreferences.getString(key.name(), "");
     }
 
-    // Within Singleton class
-
-    public String getPreference(Keys key){
-        return mMyPreferences.getString(key.name(),"");
+    public void removePlaceObj(Keys key) {
+        editor.remove(key.name());
+        editor.commit();
     }
+
+    public void clearAll() {
+        editor.clear();
+        editor.commit();
+    }
+
 }
