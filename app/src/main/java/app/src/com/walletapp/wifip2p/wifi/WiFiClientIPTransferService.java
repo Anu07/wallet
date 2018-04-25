@@ -49,10 +49,10 @@ Handler mHandler;
 
             try {
             	
-                Log.d(WiFiDirectActivity.TAG, "Opening client socket for First tiime- ");
+                Log.d(TransferActivity.TAG, "Opening client socket for First tiime- ");
                 socket.bind(null);
                 socket.connect((new InetSocketAddress(host, port)), FileTransferService.SOCKET_TIMEOUT);
-                Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
+                Log.d(TransferActivity.TAG, "Client socket - " + socket.isConnected());
                 OutputStream stream = socket.getOutputStream();
                 ContentResolver cr = context.getContentResolver();
                 InputStream is = null;
@@ -68,7 +68,7 @@ Handler mHandler;
                 
                 oos.close();	//close the ObjectOutputStream after sending data.
             } catch (IOException e) {
-                Log.e(WiFiDirectActivity.TAG, e.getMessage());
+                Log.e(TransferActivity.TAG, e.getMessage());
                 e.printStackTrace();
             } finally {
                 if (socket != null) {

@@ -62,4 +62,11 @@ public class SharedPreferencesHandler {
 	public static int getImage(Context ctx, String key) {
 		return getSharedPreferences(ctx).getInt(key, 0);
 	}
+
+	public static void clearPRefs(Context ctx){
+		Editor editor = getSharedPreferences(ctx).edit();
+		editor.clear();
+		editor.commit();
+	}
+
 }

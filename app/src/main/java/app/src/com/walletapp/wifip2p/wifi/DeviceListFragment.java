@@ -16,7 +16,6 @@
 
 package app.src.com.walletapp.wifip2p.wifi;
 
-import android.app.Dialog;
 import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.graphics.drawable.ColorDrawable;
@@ -51,7 +50,7 @@ import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 import app.src.com.walletapp.wifip2p.utils.ShowMyInformation;
 import pl.bclogic.pulsator4droid.library.PulsatorLayout;
 
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
+import static app.src.com.walletapp.wifip2p.wifi.TransferActivity.TAG;
 
 
 /**
@@ -145,7 +144,7 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         if (peers.size() == 0) {
             mOwnInfoListener.disConnectAll();
             Log.d(TAG, "No devices found");
-            timerDelayRemoveDialog(2000,pDial);
+            timerDelayRemoveDialog(1000,pDial);
             return;
         }
         //TODO OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -188,7 +187,11 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
             public void run() {
                 pDial.dismiss();
                 if (peers.size() == 0) {
-                    Toast.makeText(getActivity(), "No devices found...Please retry!!!", Toast.LENGTH_LONG).show();
+                    try {
+                        Toast.makeText(getActivity(), "No devices found...Please retry!!!", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }, time);

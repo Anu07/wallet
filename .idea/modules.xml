@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/WalletApp.iml" filepath="$PROJECT_DIR$/WalletApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
       <module fileurl="file://$PROJECT_DIR$/multipicker/multipicker.iml" filepath="$PROJECT_DIR$/multipicker/multipicker.iml" />
       <module fileurl="file://$PROJECT_DIR$/zbar/zbar.iml" filepath="$PROJECT_DIR$/zbar/zbar.iml" />
       <module fileurl="file://$PROJECT_DIR$/zbar-sample/zbar-sample.iml" filepath="$PROJECT_DIR$/zbar-sample/zbar-sample.iml" />

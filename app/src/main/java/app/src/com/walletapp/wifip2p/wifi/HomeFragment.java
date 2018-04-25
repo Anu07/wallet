@@ -38,7 +38,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
+import static app.src.com.walletapp.wifip2p.wifi.TransferActivity.TAG;
+
 
 /**
  * Created by SONY on 4/1/2018.
@@ -150,6 +151,8 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
                 EventBus.getDefault().postSticky(new OfflineEvent("0", "1"));
                 startActivity(new Intent(getActivity(), TransferActivity.class));
                 break;
+                default:
+                    optionsLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -218,6 +221,12 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
     @Override
     public void connect(WifiP2pConfig config, int position) {
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        optionsLayout.setVisibility(View.VISIBLE);
     }
 
     @Override

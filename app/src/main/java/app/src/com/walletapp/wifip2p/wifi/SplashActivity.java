@@ -14,7 +14,7 @@ import app.src.com.walletapp.R;
 import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.wifip2p.utils.SharedPreferencesHandler;
 
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
+import static app.src.com.walletapp.wifip2p.wifi.TransferActivity.TAG;
 
 /**
  * Created by SONY on 3/23/2018.
@@ -29,13 +29,20 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(SharedPreferencesHandler.getStringValues(SplashActivity.this,"loginId")!=null && SharedPreferencesHandler.getStringValues(SplashActivity.this,"user").equalsIgnoreCase("1")){
+                if(SharedPreferencesHandler.getSharedPreferences(SplashActivity.this)!=null){
+                    if(SharedPreferencesHandler.getStringValues(SplashActivity.this,"loginId")!=null && SharedPreferencesHandler.getStringValues(SplashActivity.this,"user").equalsIgnoreCase("1")){
+                        startActivity(new Intent(SplashActivity.this,MainNewActivity.class));
+                        finish();
+                    }else{
+                        startActivity(new Intent(SplashActivity.this,LoginActivity.class));
+                        finish();
+
+                    }
+                }else{
                     startActivity(new Intent(SplashActivity.this,LoginActivity.class));
                     finish();
-                }else{
-                    startActivity(new Intent(SplashActivity.this,MainNewActivity.class));
-                    finish();
                 }
+
             }
         },1000);
     }

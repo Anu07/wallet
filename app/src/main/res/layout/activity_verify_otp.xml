@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:pinview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:fillViewport="true"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:src="@drawable/splashlogo" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/l_margin"
+                android:layout_marginTop="@dimen/l_margin"
+                android:gravity="center_horizontal"
+                android:text="Verify Your Number"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/l_margin"
+                android:layout_marginLeft="@dimen/m_margin"
+                android:layout_marginRight="@dimen/m_margin"
+                android:layout_marginTop="@dimen/s_margin"
+                android:gravity="center"
+                android:text="@string/oyp_msg"
+                android:textSize="18sp" />
+
+            <com.dpizarro.pinview.library.PinView
+                android:id="@+id/pinView"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginLeft="@dimen/s_margin"
+                android:layout_marginRight="@dimen/s_margin"
+                pinview:colorTextPinBox="@android:color/black"
+                pinview:colorTextTitles="@color/white"
+                pinview:deleteOnClick="false"
+                pinview:keyboardMandatory="true"
+                pinview:numberCharacters="1"
+                pinview:numberPinBoxes="6"
+                pinview:password="false"
+                pinview:split="-"
+                pinview:textSizePinBox="@dimen/mediumText"
+                pinview:textSizeTitles="@dimen/size_titles" />
+
+            <Button
+                android:id="@+id/submitOTP"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/s_margin"
+                android:layout_marginRight="@dimen/s_margin"
+                android:layout_marginTop="@dimen/xl_margin"
+                android:background="@drawable/border_bacground"
+                android:text="Continue"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/resendTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/s_margin"
+                android:layout_marginRight="@dimen/s_margin"
+                android:layout_marginTop="@dimen/l_margin"
+                android:layout_marginBottom="50dp"
+                android:gravity="center_horizontal"
+                android:text="Resend OTP"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/smallText" />
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+</LinearLayout>

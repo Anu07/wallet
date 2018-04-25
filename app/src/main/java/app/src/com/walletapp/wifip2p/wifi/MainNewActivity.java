@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 import io.fabric.sdk.android.Fabric;
 
 import static app.src.com.walletapp.sql.SQLiteHelper.DATABASE_NAME;
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
+import static app.src.com.walletapp.wifip2p.wifi.TransferActivity.TAG;
 
 /**
  * Created by SONY on 4/1/2018.
@@ -99,13 +99,31 @@ public class MainNewActivity extends BaseActivity{
         }
     }
 
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+    private void setupViewPager(final ViewPager viewPager) {
+        final ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new HomeFragment(), "Home");
         adapter.addFragment(new ProgressFragment(), "History");
-        adapter.addFragment(new ProgressFragment(), "Settings");
+        adapter.addFragment(new SettingsFragment(), "Settings");
         adapter.addFragment(new ProfileFragment(), "Profile");
         viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                adapter.notifyDataSetChanged();
+                tab.setupWithViewPager(viewPager);
+                setupTabIcons();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
 

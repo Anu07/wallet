@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/firstName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/m_margin"
+            android:layout_marginTop="@dimen/m_margin"
+            android:layout_weight="1"
+            android:textColorHint="@android:color/darker_gray">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/fName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/if_misc_user_1276843"
+                android:drawablePadding="@dimen/xs_padding"
+                android:singleLine="true"
+                android:imeOptions="actionNext"
+                android:hint="Firstname" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/lastName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/m_margin"
+            android:layout_marginRight="@dimen/m_margin"
+            android:layout_marginTop="@dimen/m_margin"
+            android:layout_weight="1"
+            android:textColorHint="@android:color/darker_gray">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/lName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/if_misc_user_1276843"
+                android:drawablePadding="@dimen/xs_padding"
+                android:singleLine="true"
+                android:imeOptions="actionNext"
+                android:hint="Lastname" />
+
+        </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/emailLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/m_margin"
+        android:layout_marginRight="@dimen/m_margin"
+        android:layout_marginTop="@dimen/m_margin"
+        android:textColorHint="@android:color/darker_gray">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/emailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/mail_icon"
+            android:drawablePadding="@dimen/xs_padding"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
+            android:hint="Email" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/chngMpin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/m_margin"
+        android:layout_marginRight="@dimen/m_margin"
+        android:layout_marginTop="@dimen/m_margin"
+        android:textColorHint="@android:color/darker_gray">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/changeMpin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/if_lock_172497"
+            android:drawablePadding="@dimen/xs_padding"
+            android:singleLine="true"
+            android:imeOptions="actionNext"
+            android:hint="Change mPin" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/reEnterMpin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/m_margin"
+        android:layout_marginRight="@dimen/m_margin"
+        android:layout_marginTop="@dimen/m_margin"
+        android:singleLine="true"
+        android:imeOptions="actionDone"
+        android:textColorHint="@android:color/darker_gray">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/renterPin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/if_lock_172497"
+            android:drawablePadding="@dimen/xs_padding"
+            android:hint="Re Enter mPin" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/bttn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/m_margin"
+        android:layout_marginRight="@dimen/m_margin"
+        android:layout_marginTop="@dimen/l_margin"
+        android:background="@drawable/border_bacground"
+        android:text="Save" />
+
+    <Button
+        android:id="@+id/deactivare"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/m_margin"
+        android:layout_marginRight="@dimen/m_margin"
+        android:layout_marginTop="100dp"
+        android:textAllCaps="false"
+        android:textSize="18sp"
+        android:background="@drawable/red_border_hollow_bacground"
+        android:text="Deactivate Account"
+        android:textColor="@color/red"
+        android:textStyle="bold" />
+</LinearLayout>

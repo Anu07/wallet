@@ -73,16 +73,16 @@
                         <ImageView
                             android:id="@+id/onlineView"
                             android:layout_width="0dp"
-                            android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:src="@drawable/online" />
+                            android:layout_height="100dp"
+                            android:src="@drawable/pay_online" />
 
                         <ImageView
                             android:id="@+id/offlineView"
                             android:layout_width="0dp"
                             android:layout_height="100dp"
                             android:layout_weight="1"
-                            android:src="@drawable/offline" />
+                            android:src="@drawable/pay_offline" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -98,14 +98,14 @@
                             android:layout_width="0dp"
                             android:layout_height="100dp"
                             android:layout_weight="1"
-                            android:src="@drawable/qr" />
+                            android:src="@drawable/pay_qr" />
 
                         <ImageView
                             android:id="@+id/recieveView"
                             android:layout_width="0dp"
                             android:layout_height="100dp"
                             android:layout_weight="1"
-                            android:src="@drawable/recieve" />
+                            android:src="@drawable/pay_recieve" />
                     </LinearLayout>
                 </LinearLayout>
 

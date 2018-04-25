@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -13,20 +14,17 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <TextView
+            <ImageView android:id="@+id/logo"
                 android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="15dp"
+                android:layout_height="150dp"
+                android:layout_marginTop="40dp"
                 android:gravity="center_horizontal|center_vertical"
-                android:text="Register"
-                android:textSize="25dp"
-                android:textStyle="bold" />
-
+                android:src="@drawable/login_logo" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/xxxl_margin"
                 android:layout_marginLeft="@dimen/m_margin"
                 android:layout_marginRight="@dimen/m_margin"
                 android:textColorHint="@color/colorPrimaryDark">
@@ -37,31 +35,51 @@
                     android:layout_height="wrap_content"
                     android:hint="Enter fullname"
                     android:imeOptions="actionNext"
+                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    android:maxLength="30"
                     android:singleLine="true"
-                    android:inputType="text"
-                    android:maxLength="30" />
+                    android:textColor="@color/white" />
 
 
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+
+            <LinearLayout
+                android:id="@+id/countryCodeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/m_margin"
+                android:gravity="center_vertical"
                 android:layout_marginRight="@dimen/m_margin"
-                android:textColorHint="@color/colorPrimaryDark">
+                android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/phone"
+                <com.rilixtech.CountryCodePicker
+                    android:id="@+id/ccp"
+                    android:layout_width="wrap_content"
+                    android:padding="5dp"
+                    app:ccp_textColor="@color/white"
+                    android:layout_height="wrap_content" />
+
+                <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Enter phone number"
-                    android:imeOptions="actionNext"
-                    android:inputType="number"
-                    android:maxLength="15" />
+                    android:layout_marginLeft="@dimen/s_margin"
+                    android:textColorHint="@color/colorPrimaryDark">
+
+                    <EditText
+                        android:id="@+id/phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Enter phone number"
+                        android:imeOptions="actionNext"
+                        android:inputType="number"
+                        android:maxLength="15"
+                        android:textColor="@color/white" />
 
 
-            </android.support.design.widget.TextInputLayout>
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -77,7 +95,8 @@
                     android:hint="Enter email address"
                     android:imeOptions="actionNext"
                     android:inputType="textEmailAddress"
-                    android:maxLength="50" />
+                    android:maxLength="50"
+                    android:textColor="@color/white" />
 
 
             </android.support.design.widget.TextInputLayout>
@@ -94,9 +113,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Enter Password"
-                    android:maxLength="15"
                     android:imeOptions="actionDone"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:maxLength="15"
+                    android:textColor="@color/white" />
 
 
             </android.support.design.widget.TextInputLayout>
@@ -108,8 +128,9 @@
                 android:layout_marginLeft="@dimen/m_margin"
                 android:layout_marginRight="@dimen/m_margin"
                 android:layout_marginTop="@dimen/m_margin"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/border_color_bacground"
                 android:text="Submit"
+                android:textSize="@dimen/mediumText"
                 android:textColor="@color/white" />
         </LinearLayout>
 

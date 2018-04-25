@@ -1,1 +1,1 @@
-include ':app', ':multipicker', ':zxing-sample', ':core', ':zbar-sample', ':zbar', ':zxing'
+include ':app', ':multipicker', ':zxing-sample', ':core', ':zbar-sample', ':zbar', ':zxing', ':library'

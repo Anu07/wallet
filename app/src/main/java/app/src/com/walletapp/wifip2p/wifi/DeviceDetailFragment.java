@@ -717,7 +717,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             } catch (IOException e) {
                 if(e.equals("ADDRINUSE")){
                 }
-                Log.e(WiFiDirectActivity.TAG, e.getMessage());
+                Log.e(TransferActivity.TAG, e.getMessage());
                 return null;
             }
         }
@@ -779,7 +779,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     }
 
     private static void showRecieveAlert(final Activity activity, float money, final Payment payment) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity, R.style.DialogTheme);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity, R.style.AppTheme);
         LayoutInflater inflater = activity.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.custom_dialog, null);
         dialogBuilder.setView(dialogView);
@@ -848,7 +848,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             out.close();
             inputStream.close();
         } catch (IOException e) {
-            Log.d(WiFiDirectActivity.TAG, e.toString());
+            Log.d(TransferActivity.TAG, e.toString());
             return false;
         }
         return true;
@@ -897,7 +897,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             out.close();
             inputStream.close();
         } catch (IOException e) {
-            Log.d(WiFiDirectActivity.TAG, e.toString());
+            Log.d(TransferActivity.TAG, e.toString());
             return false;
         }
         return true;

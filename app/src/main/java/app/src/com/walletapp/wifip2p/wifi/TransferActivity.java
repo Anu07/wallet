@@ -71,6 +71,7 @@ import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.presenter.LoginPresenter;
 import app.src.com.walletapp.sql.SQLiteHelper;
 import app.src.com.walletapp.utils.CommonUtils;
+import app.src.com.walletapp.utils.MyProgressDialog;
 import app.src.com.walletapp.utils.WalletBalanceListener;
 import app.src.com.walletapp.view.activity.BaseActivity;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
@@ -85,7 +86,6 @@ import butterknife.OnClick;
 import io.fabric.sdk.android.Fabric;
 
 import static app.src.com.walletapp.sql.SQLiteHelper.*;
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 
 /**
@@ -126,6 +126,7 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
     public SQLiteHelper mHelper;
     WifiP2pDevice mDevice;
     private OfflineEvent event;
+    private MyProgressDialog mProgressDialog;
 
     /**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
@@ -187,7 +188,7 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
         wallet = findViewById(R.id.wallet_balance);
         walletMsg = findViewById(R.id.wallet_balance_msg);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("Wallet App");
+        getSupportActionBar().setTitle(getString(R.string.app_name));
         walletMsg.setText(getResources().getString(R.string.your_wallet_balance) + ": " + "$");            //To be replaced with real time currency
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
@@ -325,17 +326,12 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
     @Override
     public void connect(final WifiP2pConfig config, final int position) {
         disConnectAll();                    //TO disconnect all devices before connecting a device
-        final ProgressDialog pDial=new ProgressDialog(TransferActivity.this);
-        pDial.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        pDial.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        pDial.getWindow().setGravity(Gravity.CENTER);
-        pDial.setMessage("Sending...");
-        pDial.show();
+        mProgressDialog = MyProgressDialog.show(TransferActivity.this);
         manager.connect(channel, config, new ActionListener() {
 
             @Override
             public void onSuccess() {
-                pDial.cancel();
+                MyProgressDialog.dismiss(mProgressDialog);
                 Log.i(TAG, "onSuccess: Accepted");
                 // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
                 DeviceListFragment.refreshList(config, drawableImg[setRandomIcon(position)], position);
@@ -345,7 +341,7 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
             @Override
             public void onFailure(int reason) {
                 Log.i(TAG, "onSuccess: Rejected");
-                pDial.cancel();
+                MyProgressDialog.dismiss(mProgressDialog);
                 Toast.makeText(TransferActivity.this, "Connect failed. Retry.",
                         Toast.LENGTH_SHORT).show();
             }
@@ -378,7 +374,6 @@ public class TransferActivity extends BaseActivity implements ChannelListener, D
                         @Override
                         public void onSuccess() {
                             //TODO
-
                             fragment.getView().setVisibility(View.GONE);
                         }
 

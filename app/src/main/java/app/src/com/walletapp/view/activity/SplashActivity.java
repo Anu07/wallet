@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 
 import app.src.com.walletapp.R;
-import app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity;
+import app.src.com.walletapp.wifip2p.wifi.MainNewActivity;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -22,7 +22,7 @@ public class SplashActivity extends AppCompatActivity {
                     startActivity(new Intent(SplashActivity.this, SignUpActivity.class));
                     finish();
                 }else{*/
-                    startActivity(new Intent(SplashActivity.this, WiFiDirectActivity.class));
+                    startActivity(new Intent(SplashActivity.this, MainNewActivity.class));
                     finish();
 //                }
             }

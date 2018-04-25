@@ -24,6 +24,13 @@ public class ViewPagerAdapter  extends FragmentStatePagerAdapter {
         return mFragmentList.get(position);
     }
 
+
+    @Override
+    public int getItemPosition(Object object) {
+        // POSITION_NONE makes it possible to reload the PagerAdapter
+        return POSITION_NONE;
+    }
+
     @Override
     public int getCount() {
         return mFragmentList.size();

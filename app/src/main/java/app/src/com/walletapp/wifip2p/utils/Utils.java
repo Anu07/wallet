@@ -3,11 +3,14 @@ package app.src.com.walletapp.wifip2p.utils;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -17,21 +20,26 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.Window;
 import android.view.animation.PathInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import org.json.JSONObject;
+import org.json.XML;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,7 +48,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -51,12 +63,18 @@ import java.util.TimeZone;
 
 
 import app.src.com.walletapp.R;
+import app.src.com.walletapp.utils.MyPreferences;
+import app.src.com.walletapp.utils.MyProgressDialog;
 import app.src.com.walletapp.utils.RandomString;
 import app.src.com.walletapp.wifip2p.GlobalActivity;
+import app.src.com.walletapp.wifip2p.wifi.LoginActivity;
+import app.src.com.walletapp.wifip2p.wifi.MainNewActivity;
+import app.src.com.walletapp.wifip2p.wifi.VerifyOTPActivity;
 
 import static android.content.Context.WIFI_P2P_SERVICE;
 import static android.os.Looper.getMainLooper;
 import static app.src.com.walletapp.wifip2p.wifi.DeviceDetailFragment.FolderName;
+import static app.src.com.walletapp.wifip2p.wifi.VerifyOTPActivity.mAuth;
 
 /**
  * Created by anuj.sharma on 1/12/2017.
@@ -233,6 +251,46 @@ public class Utils {
         }
     }
 
+    /**
+     * To logout from app
+     */
+
+
+    public static void logOutPopUp(final Activity context) {
+        final Dialog logoutDial = new Dialog(context);
+        logoutDial.setTitle(R.string.Logout);
+        logoutDial.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        logoutDial.setContentView(R.layout.logout_dialog);
+        TextView cancel = logoutDial.findViewById(R.id.tv_cancel);
+        TextView ok = logoutDial.findViewById(R.id.tv_ok);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logoutDial.dismiss();
+            }
+        });
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                signOut();
+                SharedPreferencesHandler.setStringValues(context,"phone","");
+                SharedPreferencesHandler.setStringValues(context,"user","");
+                SharedPreferencesHandler.setStringValues(context,"userid","");
+                SharedPreferencesHandler.setStringValues(context,"loginId","");
+                MyPreferences.getInstance(context).removePlaceObj(MyPreferences.Keys.DEVICEQR);
+                Intent intent = new Intent(context, LoginActivity.class);
+                context.startActivity(intent);
+                context.finish();
+            }
+        });
+        logoutDial.show();
+    }
+
+
+    public static void signOut() {
+        mAuth.signOut();
+    }
+
 
     public static final String readFromSD() {
         final File file = new File(Environment.getExternalStorageDirectory()
@@ -269,6 +327,13 @@ public class Utils {
         RandomString tickets = new RandomString(23, new SecureRandom(), easy);
 //        RandomStringUtils.randomAlphanumberic(8)
         return tickets.nextString();
+    }
+
+    public static Dialog forgotDialog(LoginActivity context) {
+        final Dialog forgotDialog = new Dialog(context);
+        forgotDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        forgotDialog.setContentView(R.layout.forgot_dialog);
+        return forgotDialog;
     }
 
     /*
@@ -486,6 +551,17 @@ public class Utils {
         formatter.setMinimumFractionDigits(2);
         formatter.setMaximumFractionDigits(2);
         return formatter.format(val);
+    }
+
+    /**
+     * get screen wdth and height
+     *
+     */
+    public  static int getScreenWidth(Context ctx){
+        DisplayMetrics metrics = ctx.getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+        return width;
     }
 
 }

@@ -18,7 +18,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import app.src.com.walletapp.R;
-import app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity;
+import app.src.com.walletapp.wifip2p.wifi.TransferActivity;
 
 
 /**
@@ -89,7 +89,7 @@ public class WiFiPeerListAdapter extends ArrayAdapter<WifiP2pDevice> {
     }
 
     public static String getDeviceStatus(int deviceStatus) {
-        Log.d(WiFiDirectActivity.TAG, "Peer status :" + deviceStatus);
+        Log.d(TransferActivity.TAG, "Peer status :" + deviceStatus);
         switch (deviceStatus) {
             case WifiP2pDevice.AVAILABLE:
                 return "Available";

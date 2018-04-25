@@ -19,7 +19,6 @@ import app.src.com.walletapp.R;
 import app.src.com.walletapp.model.OfflineEvent;
 import app.src.com.walletapp.view.BaseView;
 
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 
 /**

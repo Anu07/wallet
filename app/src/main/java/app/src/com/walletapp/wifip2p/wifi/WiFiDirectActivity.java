@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 
 package app.src.com.walletapp.wifip2p.wifi;
 
@@ -80,13 +81,15 @@ import io.fabric.sdk.android.Fabric;
 import static app.src.com.walletapp.sql.SQLiteHelper.*;
 
 
+*/
 /**
  * An activity that uses WiFi Direct APIs to discover and connect with available
  * devices. WiFi Direct APIs are asynchronous and rely on callback mechanism
  * using interfaces to notify the application of operation success or failure.
  * The application should also register a BroadcastReceiver for notification of
  * WiFi state related events.
- */
+ *//*
+
 public class WiFiDirectActivity extends AppCompatActivity implements ChannelListener, DeviceActionListener, WalletBalanceListener, ShowMyInformation, NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.toolbar)
@@ -127,9 +130,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     WifiP2pDevice mDevice;
     private boolean doubleBackToExitPressedOnce=false;
 
-    /**
+    */
+/**
      * @param isWifiP2pEnabled the isWifiP2pEnabled to set
-     */
+     *//*
+
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
@@ -181,9 +186,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
     }
 
-    /*
+    */
+/*
       Ask permissions for Filestorage if device api > 23
-       */
+       *//*
+
     private void checkStoragePermission() {
         boolean isExternalStorage = PermissionsAndroid.getInstance().checkWriteExternalStoragePermission(this);
         if (!isExternalStorage) {
@@ -295,9 +302,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     }
 
 
-    /**
+    */
+/**
      * register the BroadcastReceiver with the intent values to be matched
-     */
+     *//*
+
     @Override
     public void onResume() {
         super.onResume();
@@ -315,10 +324,12 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
         unregisterReceiver(receiver);
     }
 
-    /**
+    */
+/**
      * Remove all peers and clear all fields. This is called on
      * BroadcastReceiver receiving a state change event.
-     */
+     *//*
+
     public void resetData() {
         DeviceListFragment fragmentList = (DeviceListFragment) getFragmentManager()
                 .findFragmentById(R.id.frag_list);
@@ -409,9 +420,11 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     }
 
 
-    /**
+    */
+/**
      * To resolve error in disconnection returning response error code:2
-     */
+     *//*
+
 
     private void deletePersistentGroups() {
         try {
@@ -447,11 +460,13 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
     @Override
     public void cancelDisconnect() {
 
-        /*
+        */
+/*
          * A cancel abort request by user. Disconnect i.e. removeGroup if
          * already connected. Else, request WifiP2pManager to abort the ongoing
          * request
-         */
+         *//*
+
         if (manager != null) {
             final DeviceListFragment fragment = (DeviceListFragment) getFragmentManager()
                     .findFragmentById(R.id.frag_list);
@@ -591,3 +606,4 @@ public class WiFiDirectActivity extends AppCompatActivity implements ChannelList
 
     }
 }
+*/

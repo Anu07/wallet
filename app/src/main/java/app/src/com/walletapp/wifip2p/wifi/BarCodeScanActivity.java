@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.Result;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -23,7 +24,6 @@ import app.src.com.walletapp.view.activity.BaseActivity;
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
 import static android.Manifest.permission.CAMERA;
-import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 
 /**
  * Created by SONY on 4/5/2018.
@@ -32,6 +32,7 @@ import static app.src.com.walletapp.wifip2p.wifi.WiFiDirectActivity.TAG;
 public class BarCodeScanActivity extends BaseActivity implements ZXingScannerView.ResultHandler {
 
     private static final int REQUEST_CAMERA = 1;
+    private static final String TAG = BarCodeScanActivity.class.getName();
     private ZXingScannerView mScannerView;
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -43,11 +44,17 @@ public class BarCodeScanActivity extends BaseActivity implements ZXingScannerVie
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentapiVersion >= android.os.Build.VERSION_CODES.M) {
             if (checkPermission()) {
-//                Toast.makeText(getApplicationContext(), "Permission already granted", Toast.LENGTH_LONG).show();
 
             } else {
                 requestPermission();
             }
+        }else{
+            if (mScannerView == null) {
+                mScannerView = new ZXingScannerView(this);
+                setContentView(mScannerView);
+            }
+            mScannerView.setResultHandler(this);
+            mScannerView.startCamera();
         }
 
     }
