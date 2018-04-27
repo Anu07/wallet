@@ -160,7 +160,6 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
      * Scan nearby Devices
      */
     private void scanDevicesNearby() {
-
         startActivity(new Intent(getActivity(), TransferActivity.class));
     }
 
@@ -226,7 +225,7 @@ public class HomeFragment extends Fragment implements DeviceActionListener, Wall
     @Override
     public void onResume() {
         super.onResume();
-        optionsLayout.setVisibility(View.VISIBLE);
+//        optionsLayout.setVisibility(View.VISIBLE);
     }
 
     @Override

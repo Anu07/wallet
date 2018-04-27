@@ -139,6 +139,7 @@ public class BarCodeScanActivity extends BaseActivity implements ZXingScannerVie
     @Override
     public void handleResult(Result rawResult) {
         final String result = rawResult.getText();
+        Toast.makeText(this,"Scanning successful",Toast.LENGTH_LONG).show();
         Log.d("QRCodeScanner", rawResult.getText());
         Log.d("QRCodeScanner", rawResult.getBarcodeFormat().toString());
 

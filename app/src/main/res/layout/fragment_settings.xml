@@ -124,7 +124,7 @@
         android:layout_marginLeft="@dimen/m_margin"
         android:layout_marginRight="@dimen/m_margin"
         android:layout_marginTop="@dimen/l_margin"
-        android:background="@drawable/border_bacground"
+        android:background="@drawable/border_color_bacground"
         android:text="Save" />
 
     <Button

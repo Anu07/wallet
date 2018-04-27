@@ -65,6 +65,8 @@ public class LoginActivity extends AppCompatActivity {
     String UPDATE_ACTION = "UpatePassword";
     String SOAP_ACTION = NAMESPACE + METHOD_NAME;
     String SOAP_ACTION_CHECKPHONE = NAMESPACE + FORGOT_CHECKPHONE;
+    String UPDATE_METHOD_NAME = "UdpateUserstatus";
+    String UPDATE_SOAP_ACTION = NAMESPACE + UPDATE_METHOD_NAME;
     private String forgotEmail = "";
     String SOAP_ACTION_UPDATE = NAMESPACE + UPDATE_ACTION;
     private String newPwd;
@@ -164,15 +166,16 @@ public class LoginActivity extends AppCompatActivity {
                 //assuming that this is your request body
 //                String body = "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:hs=\"http://tempuri.org/\">\n <soapenv:Body>\n <hs:" + METHOD_NAME + ">\n <hs:" + PARAMETER_FN + ">" + "Mansa Info" + "</hs:" + PARAMETER_FN + ">\n <hs:" + PARAMETER_PHONE + ">" + "98888988888" + "</hs:" + PARAMETER_PHONE + ">\n <hs:" + PARAMETER_EMAIL + ">" + "demo@demo.com" + "</hs:" + PARAMETER_EMAIL + ">\n  <hs:" + PARAMETER_PWD + ">" + "12345" + "</hs:" + PARAMETER_PWD + ">\n <hs:" + PARAMETER_DID + ">" + "android12345" + "</hs:" + PARAMETER_DID + ">\n </hs:" + METHOD_NAME + ">\n </soapenv:Body>\n</soapenv:Envelope>";
 
-                String body = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                        "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns1=\"http://samepay.net/\">\n" +
-                        "  <SOAP-ENV:Body>\n" +
-                        "    <ns1:Login>\n" +
-                        "      <ns1:Phone>" + phone.getText().toString().trim() + "</ns1:Phone>\n" +
-                        "      <ns1:password>" + password.getText().toString().trim() + "</ns1:password>\n" +
-                        "    </ns1:Login>\n" +
-                        "  </SOAP-ENV:Body>\n" +
-                        "</SOAP-ENV:Envelope>";
+                String body = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                        "  <soap:Body>\n" +
+                        "    <Login xmlns=\"http://samepay.net/\">\n" +
+                        "      <Phone>"+phone.getText().toString().trim()+"</Phone>\n" +
+                        "      <password>"+password.getText().toString().trim()+"</password>\n" +
+                        "      <device_id>"+SharedPreferencesHandler.getStringValues(LoginActivity.this,"DeviceToken")+"</device_id>\n" +
+                        "    </Login>\n" +
+                        "  </soap:Body>\n" +
+                        "</soap:Envelope>";
                 Log.i(TAG, "doInBackground: " + body);
                 try {
                     URL url = new URL(URL);
@@ -227,15 +230,12 @@ public class LoginActivity extends AppCompatActivity {
                 JSONObject job1 = job.getJSONObject("soap:Body");
                 JSONObject job2 = job1.getJSONObject("LoginResponse");
                 String msg = job2.getString("LoginResult");
-                if (!msg.equalsIgnoreCase("Login Failed")) {
-                    Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                    SharedPreferencesHandler.setStringValues(LoginActivity.this, "loginId", msg);
-                    SharedPreferencesHandler.setStringValues(LoginActivity.this, "userid", msg);
-                    SharedPreferencesHandler.setStringValues(LoginActivity.this, "user", "1");
-                    startActivity(new Intent(LoginActivity.this, MainNewActivity.class));
-                    finish();
-                } else if (msg.equalsIgnoreCase("Login Failed")) {
-                    Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_LONG).show();
+                JSONObject MessageJob=new JSONObject(msg);
+                Log.i(TAG, "onPostExecute: "+MessageJob);
+                if (MessageJob.getString("message").contains("Successful")) {
+                    new UpdateUserstatusAsync().execute();
+                } else {
+                    Toast.makeText(LoginActivity.this, MessageJob.getString("message"), Toast.LENGTH_LONG).show();
                 }
             } catch (Exception e) {
                 Log.e("JSON exception", e.getMessage());
@@ -453,4 +453,114 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * Update user status
+     */
+
+
+    private class UpdateUserstatusAsync extends AsyncTask<String, String, String> {
+
+        private String response;
+        BufferedReader reader;
+        MyProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog = MyProgressDialog.show(LoginActivity.this);
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                //paste your request structure here as the String body(copy it exactly as it is in soap ui)
+                //assuming that this is your request body
+//                String body = "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:hs=\"http://tempuri.org/\">\n <soapenv:Body>\n <hs:" + METHOD_NAME + ">\n <hs:" + PARAMETER_FN + ">" + "Mansa Info" + "</hs:" + PARAMETER_FN + ">\n <hs:" + PARAMETER_PHONE + ">" + "98888988888" + "</hs:" + PARAMETER_PHONE + ">\n <hs:" + PARAMETER_EMAIL + ">" + "demo@demo.com" + "</hs:" + PARAMETER_EMAIL + ">\n  <hs:" + PARAMETER_PWD + ">" + "12345" + "</hs:" + PARAMETER_PWD + ">\n <hs:" + PARAMETER_DID + ">" + "android12345" + "</hs:" + PARAMETER_DID + ">\n </hs:" + METHOD_NAME + ">\n </soapenv:Body>\n</soapenv:Envelope>";
+
+                String body = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                        "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                        "  <soap:Body>\n" +
+                        "    <UdpateUserstatus xmlns=\"http://samepay.net/\">\n" +
+                        "      <user_code>"+SharedPreferencesHandler.getStringValues(LoginActivity.this,"userid")+"</user_code>\n" +
+                        "      <status>"+"1"+"</status>\n" +        //TODO Whatr would be the status value
+                        "    </UdpateUserstatus>\n" +
+                        "  </soap:Body>\n" +
+                        "</soap:Envelope>";
+
+                Log.i(TAG, "doInBackground: " + body);
+                try {
+                    java.net.URL url = new URL(URL);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    conn.setDefaultUseCaches(false);
+                    conn.setRequestProperty("Content-Type", "text/xml");
+                    conn.setRequestProperty("SOAPAction", UPDATE_SOAP_ACTION);
+                    //push the request to the server address
+                    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+                    wr.write(body);
+                    wr.flush();
+
+                    //get the server response
+                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder builder = new StringBuilder();
+                    String line = null;
+
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                        response = builder.toString();//this is the response, parse it in onPostExecute
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        reader.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+
+                e.printStackTrace();
+            }
+
+            return response;
+        }
+
+        /**
+         * @see AsyncTask#onPostExecute(Object)
+         */
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                MyProgressDialog.dismiss(progressDialog);
+                Log.e("Response======", result);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                LoginJson = XML.toJSONObject(result);
+                Log.e("XML", result);
+                Log.e("JSON", LoginJson.toString());
+                JSONObject job = LoginJson.getJSONObject("soap:Envelope");
+                JSONObject job1 = job.getJSONObject("soap:Body");
+                JSONObject job2 = job1.getJSONObject("UdpateUserstatusResponse");
+                String msg = job2.getString("UdpateUserstatusResult");
+                Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                SharedPreferencesHandler.setStringValues(LoginActivity.this, "loginId", msg);
+                SharedPreferencesHandler.setStringValues(LoginActivity.this, "userid", msg);
+                SharedPreferencesHandler.setStringValues(LoginActivity.this, "user", "1");
+                startActivity(new Intent(LoginActivity.this, MainNewActivity.class));
+                finish();
+            } catch (Exception e) {
+                Log.e("JSON exception", e.getMessage());
+                e.printStackTrace();
+            }
+
+        }
+    }
 }

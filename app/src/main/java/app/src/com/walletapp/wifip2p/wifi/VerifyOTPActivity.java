@@ -105,9 +105,9 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
         resendTxt.setOnClickListener(this);
         submitOTP.setOnClickListener(this);
 
-        dataEvent= EventBus.getDefault().getStickyEvent(UserDataEvent.class);
-        Log.i(TAG, "onCreate: "+dataEvent.getPhone());
-        phoneNumber=dataEvent.getPhone();
+        dataEvent = EventBus.getDefault().getStickyEvent(UserDataEvent.class);
+        Log.i(TAG, "onCreate: " + dataEvent.getPhone());
+        phoneNumber = dataEvent.getPhone();
         // Initialize phone auth callbacks
         // [START phone_auth_callbacks]
         mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -144,7 +144,7 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
                 if (e instanceof FirebaseAuthInvalidCredentialsException) {
                     // Invalid request
                     // [START_EXCLUDE]
-                    Log.i(TAG, "onVerificationFailed: "+e.getMessage() +"111"+dataEvent.getPhone());
+                    Log.i(TAG, "onVerificationFailed: " + e.getMessage() + "111" + dataEvent.getPhone());
                     Snackbar.make(findViewById(android.R.id.content), "Invalid Phone number",
                             Snackbar.LENGTH_SHORT).show();
                 } else if (e instanceof FirebaseTooManyRequestsException) {
@@ -271,7 +271,6 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
     // [END sign_in_with_phone]
 
 
-
     private void updateUI(int uiState) {
         updateUI(uiState, mAuth.getCurrentUser(), null);
     }
@@ -298,19 +297,19 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
                 break;
             case STATE_CODE_SENT:
                 break;
-                // Code sent state, show the verification field, the
+            // Code sent state, show the verification field, the
             case STATE_VERIFY_FAILED:
                 break;
-                // Verification has failed, show all options
+            // Verification has failed, show all options
             case STATE_VERIFY_SUCCESS:
                 // Verification has succeeded, proceed to firebase sign in
                 // Set the verification text based on the credential
                 Log.i(TAG, "updateUI: Success");
-               new LoginAsync().execute();
+                new LoginAsync().execute();
                 break;
             case STATE_SIGNIN_FAILED:
                 break;
-                // No-op, handled by sign-in check
+            // No-op, handled by sign-in check
             case STATE_SIGNIN_SUCCESS:
                 // Np-op, handled by sign-in check
                 new LoginAsync().execute();
@@ -319,9 +318,11 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
 
         if (user == null) {
             // Signed out
-            Log.e(TAG, "updateUI: User  null" );        } else {
+            Log.e(TAG, "updateUI: User  null");
+        } else {
             // Signed in
-            Log.e(TAG, "updateUI: User not null" );          }
+            Log.e(TAG, "updateUI: User not null");
+        }
     }
 
     private boolean validatePhoneNumber() {
@@ -339,11 +340,11 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.submitOTP:
                 String code = pinView.getPinResults().toString();
-                Log.i(TAG, "onClick:PinView "+code);
+                Log.i(TAG, "onClick:PinView " + code);
                 if (code.trim().equalsIgnoreCase("")) {
                     Toast.makeText(VerifyOTPActivity.this, "OTP cannot be empty.", Toast.LENGTH_LONG).show();
                     return;
-                }else{
+                } else {
                     new LoginAsync().execute();
                 }
 
@@ -376,22 +377,22 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
                 //assuming that this is your request body
 //                String body = "<soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:hs=\"http://tempuri.org/\">\n <soapenv:Body>\n <hs:" + METHOD_NAME + ">\n <hs:" + PARAMETER_FN + ">" + "Mansa Info" + "</hs:" + PARAMETER_FN + ">\n <hs:" + PARAMETER_PHONE + ">" + "98888988888" + "</hs:" + PARAMETER_PHONE + ">\n <hs:" + PARAMETER_EMAIL + ">" + "demo@demo.com" + "</hs:" + PARAMETER_EMAIL + ">\n  <hs:" + PARAMETER_PWD + ">" + "12345" + "</hs:" + PARAMETER_PWD + ">\n <hs:" + PARAMETER_DID + ">" + "android12345" + "</hs:" + PARAMETER_DID + ">\n </hs:" + METHOD_NAME + ">\n </soapenv:Body>\n</soapenv:Envelope>";
 
-                Log.i(TAG, "doInBackground: "+dataEvent.getPhone());
+                Log.i(TAG, "doInBackground: " + dataEvent.getPhone());
 
                 String body = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns1=\"http://samepay.net/\">\n" +
                         "  <SOAP-ENV:Body>\n" +
                         "    <ns1:Register_u>\n" +
-                        "      <ns1:fullname>" + dataEvent.getName()+"</ns1:fullname>\n" +
-                        "      <ns1:Phone>" +dataEvent.getPhone()+"</ns1:Phone>\n" +
-                        "      <ns1:email>" + dataEvent.getEmail()+ "</ns1:email>\n" +
-                        "      <ns1:password>" +dataEvent.getPwd()+ "</ns1:password>\n" +
+                        "      <ns1:fullname>" + dataEvent.getName() + "</ns1:fullname>\n" +
+                        "      <ns1:Phone>" + dataEvent.getPhone() + "</ns1:Phone>\n" +
+                        "      <ns1:email>" + dataEvent.getEmail() + "</ns1:email>\n" +
+                        "      <ns1:password>" + dataEvent.getPwd() + "</ns1:password>\n" +
                         "      <ns1:device_id>" + SharedPreferencesHandler.getStringValues(VerifyOTPActivity.this, "DeviceToken") + "</ns1:device_id>\n" +
                         "    </ns1:Register_u>\n" +
                         "  </SOAP-ENV:Body>\n" +
                         "</SOAP-ENV:Envelope>";
 
-                Log.i(TAG, "doInBackground: "+body);
+                Log.i(TAG, "doInBackground: " + body);
                 try {
                     java.net.URL url = new URL(URL);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -452,10 +453,10 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
                 JSONObject job2 = job1.getJSONObject("Register_uResponse");
                 String msg = job2.getString("Register_uResult");
                 Toast.makeText(VerifyOTPActivity.this, msg, Toast.LENGTH_LONG).show();
-                if (msg.contains("Successfully") || msg.contains("Already")) {
+                if (msg.contains("Successfully") || (msg.contains("Already"))) {
                     SharedPreferencesHandler.setStringValues(VerifyOTPActivity.this, "user", "1");
-                    SharedPreferencesHandler.setStringValues(VerifyOTPActivity.this, "phone",dataEvent.getPhone());
-                    startActivity(new Intent(VerifyOTPActivity.this,MainNewActivity.class));
+                    SharedPreferencesHandler.setStringValues(VerifyOTPActivity.this, "phone", dataEvent.getPhone());
+                    startActivity(new Intent(VerifyOTPActivity.this, MainNewActivity.class));
                     finish();
                 }
             } catch (Exception e) {
@@ -467,9 +468,9 @@ public class VerifyOTPActivity extends BaseActivity implements View.OnClickListe
     }
 
 
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
     }
 }
+
