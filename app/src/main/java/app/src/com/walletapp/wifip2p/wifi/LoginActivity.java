@@ -230,12 +230,17 @@ public class LoginActivity extends AppCompatActivity {
                 JSONObject job1 = job.getJSONObject("soap:Body");
                 JSONObject job2 = job1.getJSONObject("LoginResponse");
                 String msg = job2.getString("LoginResult");
-                JSONObject MessageJob=new JSONObject(msg);
-                Log.i(TAG, "onPostExecute: "+MessageJob);
-                if (MessageJob.getString("message").contains("Successful")) {
+//                JSONObject MessageJob=new JSONObject(msg);
+                Log.i(TAG, "onPostExecute: "+msg);
+                if (msg.contains("Successful")) {
                     new UpdateUserstatusAsync().execute();
-                } else {
-                    Toast.makeText(LoginActivity.this, MessageJob.getString("message"), Toast.LENGTH_LONG).show();
+                    SharedPreferencesHandler.setStringValues(LoginActivity.this, "usercode",msg);
+                } else if(msg.contains("failed")){
+                    Toast.makeText(LoginActivity.this,"Login failed",Toast.LENGTH_LONG).show();
+                }else {
+                    SharedPreferencesHandler.setStringValues(LoginActivity.this, "usercode",msg);
+                    new UpdateUserstatusAsync().execute();
+                    Toast.makeText(LoginActivity.this, "Updating user status...", Toast.LENGTH_LONG).show();
                 }
             } catch (Exception e) {
                 Log.e("JSON exception", e.getMessage());
@@ -484,7 +489,7 @@ public class LoginActivity extends AppCompatActivity {
                         "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
                         "  <soap:Body>\n" +
                         "    <UdpateUserstatus xmlns=\"http://samepay.net/\">\n" +
-                        "      <user_code>"+SharedPreferencesHandler.getStringValues(LoginActivity.this,"userid")+"</user_code>\n" +
+                        "      <user_code>"+SharedPreferencesHandler.getStringValues(LoginActivity.this,"usercode")+"</user_code>\n" +
                         "      <status>"+"1"+"</status>\n" +        //TODO Whatr would be the status value
                         "    </UdpateUserstatus>\n" +
                         "  </soap:Body>\n" +
@@ -550,10 +555,6 @@ public class LoginActivity extends AppCompatActivity {
                 JSONObject job1 = job.getJSONObject("soap:Body");
                 JSONObject job2 = job1.getJSONObject("UdpateUserstatusResponse");
                 String msg = job2.getString("UdpateUserstatusResult");
-                Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                SharedPreferencesHandler.setStringValues(LoginActivity.this, "loginId", msg);
-                SharedPreferencesHandler.setStringValues(LoginActivity.this, "userid", msg);
-                SharedPreferencesHandler.setStringValues(LoginActivity.this, "user", "1");
                 startActivity(new Intent(LoginActivity.this, MainNewActivity.class));
                 finish();
             } catch (Exception e) {

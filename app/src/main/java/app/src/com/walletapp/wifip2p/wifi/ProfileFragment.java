@@ -156,7 +156,7 @@ public class ProfileFragment extends BaseFragment {
                         "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
                         "  <soap12:Body>\n" +
                         "    <Get_profile xmlns=\"http://samepay.net/\">\n" +
-                        "      <UserID>" + SharedPreferencesHandler.getSharedPreferences(getActivity()).getString("userid", "") + "</UserID>\n" +
+                        "      <UserID>" + SharedPreferencesHandler.getStringValues(getActivity(),"usercode") +"</UserID>\n" +
                         "    </Get_profile>\n" +
                         "  </soap12:Body>\n" +
                         "</soap12:Envelope>";

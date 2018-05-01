@@ -8,6 +8,12 @@ import android.preference.PreferenceManager;
 
 public class SharedPreferencesHandler {
 
+
+	public enum Keys {
+		USERID, DEVICEQR, LOGINSTATUS, Country, Language, Currency, DeviceToken,
+		PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, QrImage, LOGINRESPONSE,USERCODE;
+    }
+
 	public static SharedPreferences getSharedPreferences(Context ctx) {
 		return PreferenceManager.getDefaultSharedPreferences(ctx);
 	}

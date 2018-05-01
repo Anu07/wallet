@@ -173,7 +173,7 @@ public class TransferOnlineFragment extends BaseFragment {
                         "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
                         "  <soap:Body>\n" +
                         "    <PayOnline xmlns=\"http://samepay.net/\">\n" +
-                        "      <UserCode>" + SharedPreferencesHandler.getStringValues(getActivity(), "userid") + "</UserCode>\n" +
+                        "      <UserCode>" +SharedPreferencesHandler.getStringValues(getActivity(), "usercode")+ "</UserCode>\n" +
                         "      <receiverPhone>" + mEvent.getmMrchntId() + "</receiverPhone>\n" +
                         "      <amount>" + mEvent.getmAmount() + "</amount>\n" +
                         "    </PayOnline>\n" +
@@ -233,9 +233,9 @@ public class TransferOnlineFragment extends BaseFragment {
                 JSONObject job1 = job.getJSONObject("soap:Body");
                 JSONObject job2 = job1.getJSONObject("PayOnlineResponse");
                 String msg = job2.getString("PayOnlineResult");
-
+                Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
                 //TODO Update balance after transaction call SyncBalnceAsync
-
+                getActivity().startActivity(new Intent(getActivity(),MainNewActivity.class));
             } catch (Exception e) {
                 Log.e("JSON exception", e.getMessage());
                 e.printStackTrace();
@@ -268,7 +268,7 @@ public class TransferOnlineFragment extends BaseFragment {
                         "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
                         "  <soap:Body>\n" +
                         "    <GetWalletBalance xmlns=\"http://samepay.net/\">\n" +
-                        "      <UserCode>" + SharedPreferencesHandler.getStringValues(getActivity(), "userid") + "</UserCode>\n" +
+                        "      <UserCode>" + SharedPreferencesHandler.getStringValues(getActivity(), "usercode") + "</UserCode>\n" +
                         "    </GetWalletBalance>\n" +
                         "  </soap:Body>\n" +
                         "</soap:Envelope>";
@@ -331,6 +331,7 @@ public class TransferOnlineFragment extends BaseFragment {
                 } else if (Float.parseFloat(msg) < Float.parseFloat(mEvent.getmAmount())) {
                     Toast.makeText(getActivity(), "low wallet balance", Toast.LENGTH_LONG).show();
                 } else if(Utils.isNetworkAvailable(getActivity())){
+                    Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
                     new MakePaymentAsync().execute();
                 }else{
                     Toast.makeText(getActivity(), "Unexpected error occurred.", Toast.LENGTH_LONG).show();

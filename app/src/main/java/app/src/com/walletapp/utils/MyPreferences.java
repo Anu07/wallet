@@ -19,7 +19,8 @@ public class MyPreferences {
     } //prevent creating multiple instances by making the constructor private
 
     public enum Keys {
-        USERID, DEVICEQR, LOGINSTATUS, Country, Language, Currency, DeviceToken, PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, QrImage, LOGINRESPONSE;
+        USERID, DEVICEQR, LOGINSTATUS, Country, Language, Currency, DeviceToken,
+        PhoneNumber, USERNAME, TOKEN, PINSET, PIN, TXNS, LANGUAGESELECT, QrImage, LOGINRESPONSE;
     }
 
     //The context passed into the getInstance should be application level context.
